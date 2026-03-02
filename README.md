@@ -1,4 +1,4 @@
-# Finance Calculator Pro
+# Finance Calculator
 
 A user-friendly and responsive web app with **two fully independent calculator pages**:
 
