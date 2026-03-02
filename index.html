@@ -3,22 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Calculator Pro</title>
+    <title>Finance Calculator</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main class="app-shell">
+    <main class="app-shell home-shell">
         <section class="calculator-card home-card">
-            <p class="eyebrow">Smart Finance Tool</p>
-            <h1>Finance Calculator Pro</h1>
+            <p class="eyebrow">Rupayasathi</p>
+            <h1>Finance Calculator</h1>
             <p class="subtitle">Choose a calculator to get quick, accurate results with a clean and simple experience.</p>
 
             <div class="home-actions">
                 <a class="nav-btn" href="emi.html">Open EMI Calculator</a>
                 <a class="nav-btn secondary" href="sip.html">Open SIP Calculator</a>
+            </div>
+        </section>
+
+        <section class="calculator-card market-card">
+            <div class="market-header">
+                <p class="eyebrow">Market Snapshot</p>
+                <h2>Top Stock Indices & Stocks</h2>
+            </div>
+            <p class="subtitle market-subtitle">Live widget powered by TradingView with regularly refreshed market data.</p>
+            <div class="tradingview-widget-container">
+                <div id="tradingview_market_chart"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+                <script type="text/javascript">
+                    new TradingView.widget({
+                        "autosize": true,
+                        "symbol": "NSE:NIFTY",
+                        "interval": "D",
+                        "timezone": "Asia/Kolkata",
+                        "theme": "light",
+                        "style": "1",
+                        "locale": "en",
+                        "allow_symbol_change": true,
+                        "watchlist": [
+                            "NSE:NIFTY",
+                            "BSE:SENSEX",
+                            "NSE:BANKNIFTY",
+                            "NASDAQ:AAPL",
+                            "NASDAQ:MSFT",
+                            "NASDAQ:GOOGL"
+                        ],
+                        "container_id": "tradingview_market_chart"
+                    });
+                </script>
             </div>
         </section>
     </main>
