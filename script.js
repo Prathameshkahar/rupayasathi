@@ -2,17 +2,6 @@ function formatCurrency(value, currency = "INR", locale = "en-IN") {
   return new Intl.NumberFormat(locale, { style: "currency", currency, maximumFractionDigits: 2 }).format(value);
 }
 
-function formatNumber(value) {
-  return new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 }).format(value);
-}
-
-function lifestyleCategory(monthlySalary) {
-  if (monthlySalary < 20000) return "Basic";
-  if (monthlySalary <= 60000) return "Middle Class";
-  if (monthlySalary <= 150000) return "Upper Middle";
-  return "Premium";
-}
-
 function calculateEMI(principal, annualRate, years) {
   const months = years * 12;
   const monthlyRate = annualRate / 12 / 100;
@@ -23,7 +12,6 @@ function calculateEMI(principal, annualRate, years) {
 document.addEventListener("DOMContentLoaded", () => {
   const menuButton = document.querySelector(".menu-toggle");
   const navLinks = document.querySelector(".nav-links");
-  const dropdownToggles = document.querySelectorAll(".dropdown-toggle");
 
   if (menuButton && navLinks) {
     menuButton.addEventListener("click", () => {
@@ -32,29 +20,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  dropdownToggles.forEach((toggle) => {
-    toggle.addEventListener("click", () => toggle.parentElement.classList.toggle("open"));
-  });
-
   const contactForm = document.getElementById("contactForm");
   if (contactForm) {
     const formMessage = document.getElementById("formMessage");
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     contactForm.addEventListener("submit", (event) => {
       event.preventDefault();
       const name = document.getElementById("name").value.trim();
       const email = document.getElementById("email").value.trim();
       const message = document.getElementById("message").value.trim();
+
       if (!name || !email || !message) {
         formMessage.textContent = "Please fill all fields.";
         formMessage.className = "form-message error-state";
         return;
       }
+
       if (!emailRegex.test(email)) {
         formMessage.textContent = "Please enter a valid email.";
         formMessage.className = "form-message error-state";
         return;
       }
+
       formMessage.textContent = "Thank you! Our team will connect shortly.";
       formMessage.className = "form-message success-state";
       contactForm.reset();
@@ -127,38 +115,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const adjusted = amount * Math.pow(1 + rate, years);
       const reduced = amount - amount / Math.pow(1 + rate, years);
       result.innerHTML = `<p>Future Adjusted Value Needed: <span class="highlight">${formatCurrency(adjusted)}</span></p><p>Purchasing Power Reduction: ${formatCurrency(reduced)}</p>`;
-    }
-
-    if (type === "salary") {
-      const salary = +document.getElementById("indianSalary").value;
-      const country = document.getElementById("country").value;
-      const cityType = document.getElementById("cityType").value;
-      if (!salary || !country || !cityType) return (result.innerHTML = "Please enter valid values.");
-
-      const cfg = {
-        USA: { multiplier: 3.2, currency: "USD", symbol: "$" },
-        UK: { multiplier: 2.8, currency: "GBP", symbol: "£" },
-        Canada: { multiplier: 2.6, currency: "CAD", symbol: "C$" },
-        Germany: { multiplier: 2.4, currency: "EUR", symbol: "€" },
-        Australia: { multiplier: 2.9, currency: "AUD", symbol: "A$" }
-      };
-      const cityAdj = { "Tier 1": 1.1, "Tier 2": 1, "Tier 3": 0.9 };
-      const monthlyEq = salary * cfg[country].multiplier * cityAdj[cityType];
-      const annualEq = monthlyEq * 12;
-      const indiaClass = lifestyleCategory(salary);
-      const foreignClass = lifestyleCategory(monthlyEq / cfg[country].multiplier);
-
-      result.innerHTML = `<p>Equivalent Monthly Salary (${country}): <span class="highlight">${formatCurrency(monthlyEq, cfg[country].currency, "en")}</span></p>
-      <p>Equivalent Annual Salary: ${formatCurrency(annualEq, cfg[country].currency, "en")}</p>
-      <p>Lifestyle in India: <strong>${indiaClass}</strong></p>
-      <p>Lifestyle Equivalent in ${country}: <strong>${foreignClass}</strong></p>
-      <p>With a city adjustment for ${cityType}, your Indian monthly salary of ${formatCurrency(salary)} aligns to a competitive overseas standard for core living costs and lifestyle quality.</p>
-      <table class="comparison-table"><thead><tr><th>Expense Head</th><th>India Baseline</th><th>${country} Equivalent</th></tr></thead><tbody>
-      <tr><td>Rent</td><td>${formatCurrency(salary * 0.3)}</td><td>${formatCurrency(monthlyEq * 0.35, cfg[country].currency, "en")}</td></tr>
-      <tr><td>Grocery</td><td>${formatCurrency(salary * 0.15)}</td><td>${formatCurrency(monthlyEq * 0.18, cfg[country].currency, "en")}</td></tr>
-      <tr><td>Transport</td><td>${formatCurrency(salary * 0.1)}</td><td>${formatCurrency(monthlyEq * 0.12, cfg[country].currency, "en")}</td></tr>
-      <tr><td>Healthcare</td><td>${formatCurrency(salary * 0.08)}</td><td>${formatCurrency(monthlyEq * 0.1, cfg[country].currency, "en")}</td></tr>
-      </tbody></table>`;
     }
   });
 });
