@@ -25,8 +25,59 @@
     `).join("");
   }
 
+
+
+  function prettifyLabel(label) {
+    return label.replace(/\(.*?\)/g, "").trim();
+  }
+
+  function buildInfoContent(calculator) {
+    const terms = calculator.fields.slice(0, 5).map((field) => ({
+      term: prettifyLabel(field.label),
+      meaning: `${prettifyLabel(field.label)} is an input used to estimate your ${calculator.name.toLowerCase().replace(" calculator", "")} outcome.`
+    }));
+
+    const concept = calculator.fields.map((field) => prettifyLabel(field.label).toLowerCase()).join(", ");
+
+    return `
+      <div class="info-divider" role="presentation"></div>
+      <h2>What Does This Calculator Do?</h2>
+      <p>The ${calculator.name} helps you convert key financial inputs into clear, actionable numbers in seconds. Instead of calculating manually, you can enter your values and instantly see estimates that are useful for everyday money decisions.</p>
+      <p>Conceptually, this tool processes factors like ${concept} and applies a standard financial formula in the background. This gives you a practical projection so you can compare options and understand how changing one input can affect your result.</p>
+      <p>This calculator is useful for salaried professionals, self-employed users, students, families, and investors who want better visibility before they commit to a plan. It is especially helpful when you need fast estimates during budgeting, investing, borrowing, or tax planning.</p>
+
+      <h2>Why Is This Important?</h2>
+      <ul>
+        <li>Supports informed financial decisions with quick and structured projections.</li>
+        <li>Helps you test real-life what-if scenarios before you commit money.</li>
+        <li>Improves planning by showing how small changes can influence long-term outcomes.</li>
+        <li>Reduces calculation errors and saves time compared to manual methods.</li>
+      </ul>
+
+      <h2>Key Terms Explained</h2>
+      <div class="key-terms-grid">
+        ${terms.map((item) => `<article><h3>${item.term}</h3><p>${item.meaning}</p></article>`).join("")}
+      </div>
+
+      <h2>Frequently Asked Questions</h2>
+      <article class="faq-item">
+        <h3>How accurate is this calculator?</h3>
+        <p>It uses standard formulas for planning estimates. Actual values can vary based on policy changes, charges, taxes, and provider-specific rules.</p>
+      </article>
+      <article class="faq-item">
+        <h3>Who should use this calculator?</h3>
+        <p>Anyone who wants faster clarity while planning investments, loans, taxes, or cash flows can use it before taking financial decisions.</p>
+      </article>
+      <article class="faq-item">
+        <h3>How can I use the result effectively?</h3>
+        <p>Run multiple scenarios with different inputs, compare outcomes, and choose a plan that best fits your risk profile, monthly budget, and long-term goals.</p>
+      </article>
+    `;
+  }
+
   function renderCalculatorPage() {
     const container = document.getElementById("calculatorApp");
+    const infoContainer = document.getElementById("calculatorInfoSection");
     if (!container) return;
 
     const slug = container.dataset.calculator;
@@ -51,6 +102,10 @@
       <div class="result-card" id="resultBox" aria-live="polite">Enter values and click calculate.</div>
       <a class="btn btn-outline full-width" href="../calculators.html">← Back to Calculators Hub</a>
     `;
+
+    if (infoContainer) {
+      infoContainer.innerHTML = buildInfoContent(calculator);
+    }
 
     const form = document.getElementById("dynamicCalculatorForm");
     const resultBox = document.getElementById("resultBox");
