@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="Rupaya Saathi homepage demo">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d8eaff"/>
+      <stop offset="55%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#d5f3e7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1280" height="72" fill="#ffffff"/>
+  <text x="80" y="45" font-family="Poppins, Arial, sans-serif" font-size="28" font-weight="700" fill="#15314b">Rupaya Saathi</text>
+  <g font-family="Poppins, Arial, sans-serif" font-size="16" fill="#587187">
+    <text x="680" y="45">Home</text>
+    <text x="760" y="45">EMI Calculator</text>
+    <text x="915" y="45">SIP Calculator</text>
+    <text x="1045" y="45">Blogs/News</text>
+    <text x="1160" y="45">Contact Us</text>
+  </g>
+
+  <text x="640" y="210" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="24" font-weight="600" fill="#1fa971">Smart Money. Better Future.</text>
+  <text x="640" y="280" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="52" font-weight="700" fill="#15314b">Empowering India with Financial Literacy</text>
+  <text x="640" y="340" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="23" fill="#15314b">Our mission is to help Indians save, grow, and gain money in every possible way</text>
+  <text x="640" y="375" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="23" fill="#15314b">through smart financial tools, insights, and guidance.</text>
+
+  <g font-family="Poppins, Arial, sans-serif" font-weight="600" font-size="20">
+    <rect x="390" y="455" width="170" height="52" rx="10" fill="#0d6efd"/>
+    <text x="475" y="488" text-anchor="middle" fill="#ffffff">EMI Calculator</text>
+
+    <rect x="575" y="455" width="170" height="52" rx="10" fill="#1fa971"/>
+    <text x="660" y="488" text-anchor="middle" fill="#ffffff">SIP Calculator</text>
+
+    <rect x="760" y="455" width="150" height="52" rx="10" fill="#ffffff" stroke="#0d6efd"/>
+    <text x="835" y="488" text-anchor="middle" fill="#0d6efd">Read Blogs</text>
+  </g>
+</svg>
