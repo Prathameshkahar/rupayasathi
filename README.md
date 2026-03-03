@@ -1,10 +1,8 @@
 # Rupaya Saathi
 
-A structured, multi-page financial website built with pure HTML, CSS, and JavaScript.
+A multi-page financial website built with pure HTML, CSS, and JavaScript.
 
 ## Demo Screenshot
-
-The demo screenshot is now stored in-repo to avoid broken/not-found links:
 
 ![Rupaya Saathi Home Demo](assets/demo-home.svg)
 
@@ -13,38 +11,32 @@ The demo screenshot is now stored in-repo to avoid broken/not-found links:
 ```
 /
 ├── index.html
-├── emi.html
-├── sip.html
+├── calculators.html
+├── calculators/
+│   ├── emi.html
+│   ├── sip.html
+│   ├── fd.html
+│   ├── lumpsum.html
+│   ├── loan-eligibility.html
+│   └── inflation.html
 ├── blogs.html
+├── blog-save-10000.html
+├── blog-sip-vs-fd.html
+├── blog-budgeting.html
 ├── contact.html
 ├── style.css
 ├── script.js
-├── emi.js
-├── sip.js
 └── assets/
     └── demo-home.svg
 ```
 
-## Pages
-
-1. **Home** (`index.html`)
-   - Brand-focused hero section with mission statement and CTAs.
-2. **EMI Calculator** (`emi.html` + `emi.js`)
-   - Calculates EMI, interest payable, and total repayment.
-3. **SIP Calculator** (`sip.html` + `sip.js`)
-   - Calculates SIP maturity, invested amount, and wealth gain.
-4. **Blogs/News** (`blogs.html`)
-   - Card-based finance blogs/news layout.
-5. **Contact Us** (`contact.html` + `script.js`)
-   - Contact form with client-side validation.
-
 ## Features
 
 - Shared responsive navbar across all pages.
-- Active page highlighting in navigation.
-- Blue/green professional financial theme.
-- Google Font integration (`Poppins`).
-- Responsive layout and hover animations.
+- Dedicated calculators hub page with card layout.
+- Six financial calculators with interactive result cards.
+- Blue + green fintech design with Poppins font.
+- Mobile responsive layout and hover animations.
 - Pure HTML/CSS/JS (no frameworks).
 
 ## Run locally
