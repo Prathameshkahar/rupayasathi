@@ -2,6 +2,37 @@
 document.addEventListener("DOMContentLoaded", () => {
     const menuButton = document.querySelector(".menu-toggle");
     const navLinks = document.querySelector(".nav-links");
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme === "dark") {
+        document.body.classList.add("dark-mode");
+    }
+
+    if (navLinks) {
+        const toggleItem = document.createElement("li");
+        toggleItem.className = "theme-toggle-item";
+
+        const themeToggle = document.createElement("button");
+        themeToggle.type = "button";
+        themeToggle.className = "theme-toggle";
+
+        const setToggleLabel = () => {
+            const isDarkMode = document.body.classList.contains("dark-mode");
+            themeToggle.textContent = isDarkMode ? "☀ Light Mode" : "🌙 Dark Mode";
+            themeToggle.setAttribute("aria-label", isDarkMode ? "Switch to light mode" : "Switch to dark mode");
+        };
+
+        setToggleLabel();
+
+        themeToggle.addEventListener("click", () => {
+            const isDarkMode = document.body.classList.toggle("dark-mode");
+            localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+            setToggleLabel();
+        });
+
+        toggleItem.appendChild(themeToggle);
+        navLinks.appendChild(toggleItem);
+    }
 
     if (menuButton && navLinks) {
         menuButton.addEventListener("click", () => {
