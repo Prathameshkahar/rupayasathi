@@ -1,45 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rupaya Saathi | Home</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Rupaya Saathi is a multi-calculator fintech platform for smart financial planning.">
+  <title>Rupaya Saathi | Smart Financial Calculators</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="site-header">
-        <nav class="navbar container">
-            <a class="logo" href="index.html">Rupaya Saathi</a>
-            <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
-            <ul class="nav-links">
-                <li><a class="active" href="index.html">Home</a></li>
-                <li><a href="emi.html">EMI Calculator</a></li>
-                <li><a href="sip.html">SIP Calculator</a></li>
-                <li><a href="blogs.html">Blogs/News</a></li>
-                <li><a href="contact.html">Contact Us</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <main>
-        <section class="hero">
-            <div class="container hero-content">
-                <p class="tagline">Smart Money. Better Future.</p>
-                <h1>Empowering India with Financial Literacy</h1>
-                <p class="mission">Our mission is to help Indians save, grow, and gain money in every possible way through smart financial tools, insights, and guidance.</p>
-                <p class="description">Rupaya Saathi makes money management simple by combining practical calculators, educational blogs, and reliable guidance for every stage of your financial journey.</p>
-                <div class="cta-group">
-                    <a class="btn btn-primary" href="emi.html">EMI Calculator</a>
-                    <a class="btn btn-secondary" href="sip.html">SIP Calculator</a>
-                    <a class="btn btn-outline" href="blogs.html">Read Blogs</a>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <script src="script.js"></script>
+<header class="site-header">
+  <nav class="navbar container">
+    <a class="logo" href="index.html">Rupaya Saathi</a>
+    <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <ul class="nav-links">
+      <li><a class="active" href="index.html">Home</a></li>
+      <li class="dropdown active-parent"><button class="dropdown-toggle">Calculators ▼</button>
+        <ul class="dropdown-menu">
+          <li><a href="calculators/emi.html">EMI Calculator</a></li><li><a href="calculators/sip.html">SIP Calculator</a></li>
+          <li><a href="calculators/fd.html">FD Calculator</a></li><li><a href="calculators/lumpsum.html">Lumpsum Calculator</a></li>
+          <li><a href="calculators/loan-eligibility.html">Loan Eligibility</a></li><li><a href="calculators/inflation.html">Inflation Calculator</a></li>
+          <li><a href="calculators/salary-compare.html">Global Salary Comparison</a></li>
+        </ul>
+      </li>
+      <li><a href="blogs.html">Blogs</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+<main class="hero">
+  <section class="container hero-content">
+    <p class="tagline">Your fintech partner for better decisions</p>
+    <h1>One Platform. Seven Financial Calculators.</h1>
+    <p class="description">Plan EMIs, SIPs, fixed deposits, inflation impact, investment growth, loan eligibility and global salary equivalents in a clean, interactive interface.</p>
+    <div class="cta-group">
+      <a class="btn btn-primary" href="calculators/emi.html">Start with EMI</a>
+      <a class="btn btn-secondary" href="calculators/salary-compare.html">Compare Global Salary</a>
+    </div>
+  </section>
+</main>
+<script src="script.js"></script>
 </body>
 </html>
