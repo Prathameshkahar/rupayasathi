@@ -4,35 +4,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const navLinks = document.querySelector(".nav-links");
     const savedTheme = localStorage.getItem("theme");
 
+    // Floating theme toggle (shown on all pages).
+    const themeToggle = document.createElement("button");
+    themeToggle.type = "button";
+    themeToggle.className = "theme-toggle";
+    themeToggle.setAttribute("aria-live", "polite");
+
     if (savedTheme === "dark") {
         document.body.classList.add("dark-mode");
     }
 
-    if (navLinks) {
-        const toggleItem = document.createElement("li");
-        toggleItem.className = "theme-toggle-item";
+    const setToggleIcon = () => {
+        const isDarkMode = document.body.classList.contains("dark-mode");
+        themeToggle.textContent = isDarkMode ? "☀" : "🌙";
+        themeToggle.setAttribute("aria-label", isDarkMode ? "Switch to light mode" : "Switch to dark mode");
+        themeToggle.setAttribute("title", isDarkMode ? "Switch to light mode" : "Switch to dark mode");
+    };
 
-        const themeToggle = document.createElement("button");
-        themeToggle.type = "button";
-        themeToggle.className = "theme-toggle";
+    setToggleIcon();
 
-        const setToggleLabel = () => {
-            const isDarkMode = document.body.classList.contains("dark-mode");
-            themeToggle.textContent = isDarkMode ? "☀ Light Mode" : "🌙 Dark Mode";
-            themeToggle.setAttribute("aria-label", isDarkMode ? "Switch to light mode" : "Switch to dark mode");
-        };
+    themeToggle.addEventListener("click", () => {
+        const isDarkMode = document.body.classList.toggle("dark-mode");
+        localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+        setToggleIcon();
+    });
 
-        setToggleLabel();
-
-        themeToggle.addEventListener("click", () => {
-            const isDarkMode = document.body.classList.toggle("dark-mode");
-            localStorage.setItem("theme", isDarkMode ? "dark" : "light");
-            setToggleLabel();
-        });
-
-        toggleItem.appendChild(themeToggle);
-        navLinks.appendChild(toggleItem);
-    }
+    document.body.appendChild(themeToggle);
 
     if (menuButton && navLinks) {
         menuButton.addEventListener("click", () => {
