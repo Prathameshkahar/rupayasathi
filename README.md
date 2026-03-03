@@ -1,38 +1,56 @@
-# Finance Calculator
+# Rupaya Saathi
 
-A user-friendly and responsive web app with **two fully independent calculator pages**:
+A structured, multi-page financial website built with pure HTML, CSS, and JavaScript.
 
-- `emi.html` → EMI (Equated Monthly Installment) Calculator
-- `sip.html` → SIP (Systematic Investment Plan) Calculator
+## Demo Screenshot
 
-## Features
+The demo screenshot is now stored in-repo to avoid broken/not-found links:
 
-- Separate pages for EMI and SIP (no shared inputs/outputs).
-- Clean navigation between Home, EMI, and SIP pages.
-- Clear labels, placeholders, and validation messages.
-- Results shown with simple, human-readable explanations.
-- Indian currency formatting (`₹`) for financial values.
-- Responsive layout for desktop and mobile.
+![Rupaya Saathi Home Demo](assets/demo-home.svg)
+
+## Project Structure
+
+```
+/
+├── index.html
+├── emi.html
+├── sip.html
+├── blogs.html
+├── contact.html
+├── style.css
+├── script.js
+├── emi.js
+├── sip.js
+└── assets/
+    └── demo-home.svg
+```
 
 ## Pages
 
 1. **Home** (`index.html`)
-   - Simple landing page with navigation buttons.
-
+   - Brand-focused hero section with mission statement and CTAs.
 2. **EMI Calculator** (`emi.html` + `emi.js`)
-   - Inputs: Loan Amount, Annual Interest Rate, Loan Tenure.
-   - Output: Estimated monthly EMI with explanation.
-
+   - Calculates EMI, interest payable, and total repayment.
 3. **SIP Calculator** (`sip.html` + `sip.js`)
-   - Inputs: Monthly Investment, Expected Annual Return Rate, Investment Duration.
-   - Output: Estimated maturity value with explanation.
+   - Calculates SIP maturity, invested amount, and wealth gain.
+4. **Blogs/News** (`blogs.html`)
+   - Card-based finance blogs/news layout.
+5. **Contact Us** (`contact.html` + `script.js`)
+   - Contact form with client-side validation.
+
+## Features
+
+- Shared responsive navbar across all pages.
+- Active page highlighting in navigation.
+- Blue/green professional financial theme.
+- Google Font integration (`Poppins`).
+- Responsive layout and hover animations.
+- Pure HTML/CSS/JS (no frameworks).
 
 ## Run locally
-
-Open `index.html` directly in your browser or run a local server:
 
 ```bash
 python3 -m http.server 4173
 ```
 
-Then visit: `http://127.0.0.1:4173`
+Open: `http://127.0.0.1:4173/index.html`
