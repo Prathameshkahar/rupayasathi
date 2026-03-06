@@ -1,0 +1,114 @@
+.assistance-page {
+    display: grid;
+    gap: 1rem;
+}
+
+.assistance-chat-card {
+    display: grid;
+    gap: 1rem;
+}
+
+.chat-messages {
+    min-height: 320px;
+    max-height: 62vh;
+    overflow-y: auto;
+    display: grid;
+    gap: 0.8rem;
+    padding: 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--result-bg);
+    scroll-behavior: smooth;
+}
+
+.chat-bubble {
+    max-width: min(92%, 760px);
+    border-radius: 14px;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--border);
+    display: grid;
+    gap: 0.35rem;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: bubbleIn 220ms ease forwards;
+}
+
+.chat-bubble p {
+    margin: 0;
+    line-height: 1.45;
+}
+
+.chat-user {
+    justify-self: end;
+    background: color-mix(in srgb, var(--primary) 15%, var(--card-bg));
+}
+
+.chat-ai {
+    justify-self: start;
+    background: var(--card-bg);
+}
+
+.message-time {
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+.assistant-disclaimer {
+    font-size: 0.82rem;
+    color: var(--muted);
+    border-top: 1px dashed var(--border);
+    padding-top: 0.4rem;
+}
+
+.assistant-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.7rem;
+}
+
+.assistant-form input {
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.assistant-form button[disabled] {
+    opacity: 0.75;
+    cursor: wait;
+}
+
+.loading-dots::after {
+    content: "";
+    display: inline-block;
+    width: 1.2em;
+    text-align: left;
+    animation: dots 1s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0% { content: ""; }
+    25% { content: "."; }
+    50% { content: ".."; }
+    75% { content: "..."; }
+    100% { content: ""; }
+}
+
+@keyframes bubbleIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sr-only {
+    position: absolute;
+    left: -9999px;
+}
+
+@media (max-width: 640px) {
+    .assistant-form {
+        grid-template-columns: 1fr;
+    }
+}
