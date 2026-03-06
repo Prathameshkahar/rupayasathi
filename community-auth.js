@@ -1,55 +1,42 @@
 import { signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { auth } from "./firebase-config.js";
 
-const prefixes = ["Paisa", "Lakshmi", "Desi", "Smart", "Budget", "Saving"];
-const suffixes = ["Investor", "Trader", "Guru", "Yodha", "Planner", "Ninja"];
+const prefixes = ["Paisa", "Lakshmi", "Desi", "Budget", "Saving", "Smart"];
+const suffixes = ["Investor", "Trader", "Guru", "Planner", "Ninja", "Builder"];
 
 const randomFrom = (list) => list[Math.floor(Math.random() * list.length)];
 
-const initials = (name) => (name || "RU").slice(0, 2).toUpperCase();
-
-const randomColor = () => {
-    const hue = Math.floor(Math.random() * 360);
-    return `hsl(${hue} 70% 45%)`;
-};
-
 const generateIdentity = () => {
     const username = `${randomFrom(prefixes)}${randomFrom(suffixes)}`;
-    const bg = randomColor();
     return {
         username,
-        avatar: `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(username)}&backgroundColor=${encodeURIComponent(bg.replace('#', ''))}`,
-        initials: initials(username),
-        color: bg
+        avatar: `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(username)}&radius=50&backgroundType=gradientLinear`
     };
 };
 
 export const getCommunityIdentity = async () => {
-    let storedUser = localStorage.getItem("communityUser");
-    let storedAvatar = localStorage.getItem("communityAvatar");
-
-    if (!storedUser || !storedAvatar) {
+    let stored = JSON.parse(localStorage.getItem("communityUserProfile") || "null");
+    if (!stored?.username || !stored?.avatar || !stored?.joinDate) {
         const identity = generateIdentity();
-        storedUser = identity.username;
-        storedAvatar = identity.avatar;
-        localStorage.setItem("communityUser", storedUser);
-        localStorage.setItem("communityAvatar", storedAvatar);
+        stored = {
+            ...identity,
+            joinDate: new Date().toISOString()
+        };
+        localStorage.setItem("communityUserProfile", JSON.stringify(stored));
     }
 
     try {
         await signInAnonymously(auth);
     } catch (error) {
-        console.warn("Anonymous auth failed", error);
+        console.warn("Anonymous auth unavailable. Running local mode.", error);
     }
 
     return new Promise((resolve) => {
         const stop = onAuthStateChanged(auth, (user) => {
             stop();
-            resolve({
-                uid: user?.uid || null,
-                username: storedUser,
-                avatar: storedAvatar
-            });
+            resolve({ uid: user?.uid || `local-${stored.username}`, ...stored });
+        }, () => {
+            resolve({ uid: `local-${stored.username}`, ...stored });
         });
     });
 };

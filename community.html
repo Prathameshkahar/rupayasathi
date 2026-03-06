@@ -22,66 +22,84 @@
             <li><a href="blogs.html">Blogs</a></li>
             <li><a href="contact.html">Contact</a></li>
         </ul>
+        <a href="profile.html" id="profileIconBtn" class="profile-icon-btn" aria-label="Open profile page">
+            <img id="profileIconImage" class="profile-icon-image" alt="Profile avatar" loading="lazy">
+        </a>
     </nav>
 </header>
 
-<main class="community-main container">
-    <aside class="community-left card">
-        <h2>Community</h2>
-        <p id="identityChip" class="identity-chip">Signing in anonymously...</p>
-        <nav class="shortcut-nav" aria-label="Community shortcuts">
-            <a href="#feed" class="shortcut-item"><span>🏠</span>Home Feed</a>
-            <a href="#ask-box" class="shortcut-item"><span>❓</span>Ask Question</a>
-            <a href="#trending-panel" class="shortcut-item"><span>📈</span>Trending Questions</a>
-            <a href="#my-activity" class="shortcut-item"><span>🧾</span>My Activity</a>
-        </nav>
-    </aside>
-
-    <section class="community-feed" id="feed">
-        <article class="card ask-box" id="ask-box">
-            <h1>Ask the Community</h1>
-            <p>Discuss investments, taxes, savings and financial planning with fellow Indians.</p>
-            <form id="postForm" class="post-form" novalidate>
-                <input id="postTitle" type="text" placeholder="Post title" maxlength="120" required>
-                <textarea id="postContent" rows="3" placeholder="Describe your question in detail" maxlength="700" required></textarea>
-                <button type="submit" class="btn btn-primary">Post Question</button>
-                <p id="postMessage" class="post-message" aria-live="polite"></p>
-            </form>
-        </article>
-
-        <section class="thread-view card" id="threadView" hidden aria-live="polite"></section>
-
-        <section id="my-activity" class="card my-activity">
-            <h2>My Activity</h2>
-            <p id="myActivityText">No activity yet.</p>
-        </section>
-
-        <section id="postsFeed" class="posts-feed" aria-live="polite"></section>
+<main class="community-shell">
+    <section class="community-hero">
+        <video class="hero-video" autoplay muted loop playsinline poster="assets/demo-home.svg">
+            <source src="https://cdn.coverr.co/videos/coverr-analysing-stock-market-data-1579/1080p.mp4" type="video/mp4">
+        </video>
+        <div class="hero-overlay"></div>
+        <div class="hero-content container">
+            <p class="hero-tag">Rupaya Saathi Community</p>
+            <h1>Ask, Answer & Grow with Anonymous Finance Discussions</h1>
+            <p>Real-time conversations on saving, investing, taxation and money management.</p>
+            <button id="heroAskBtn" class="btn btn-primary">Ask a Question</button>
+        </div>
     </section>
 
-    <aside class="community-right">
-        <section class="card info-panel">
-            <h3>About the Community</h3>
-            <p>Discuss investments, taxes, savings and financial planning with fellow Indians.</p>
+    <section class="community-main container">
+        <aside class="community-left card" id="leftSidebar">
+            <h2>Community</h2>
+            <p id="identityChip" class="identity-chip">Signing in anonymously...</p>
+            <nav class="shortcut-nav" aria-label="Community shortcuts">
+                <a href="#feed" class="shortcut-item"><span>🏠</span>Home Feed</a>
+                <a href="#ask-box" class="shortcut-item"><span>❓</span>Ask Question</a>
+                <a href="#trending-panel" class="shortcut-item"><span>📈</span>Trending</a>
+                <a href="#my-activity" class="shortcut-item"><span>🧾</span>My Activity</a>
+            </nav>
+        </aside>
+
+        <section class="community-feed" id="feed">
+            <article class="card ask-box" id="ask-box">
+                <h2>Start a Discussion</h2>
+                <p>Get help from the community with practical, anonymous finance questions.</p>
+                <form id="postForm" class="post-form" novalidate>
+                    <input id="postTitle" type="text" placeholder="Post title" maxlength="120" required>
+                    <textarea id="postContent" rows="4" placeholder="Describe your question in detail" maxlength="700" required></textarea>
+                    <button type="submit" class="btn btn-primary animated-btn">Post Question</button>
+                    <p id="postMessage" class="post-message" aria-live="polite"></p>
+                </form>
+            </article>
+
+            <section class="thread-view card" id="threadView" hidden aria-live="polite"></section>
+
+            <section id="my-activity" class="card my-activity">
+                <h3>My Activity</h3>
+                <p id="myActivityText">No activity yet.</p>
+            </section>
+
+            <section id="postsFeed" class="posts-feed" aria-live="polite"></section>
         </section>
 
-        <section class="card info-panel" id="trending-panel">
-            <h3>Trending Topics</h3>
-            <div class="topic-tags">
-                <span>SIP</span>
-                <span>Mutual Funds</span>
-                <span>Budget</span>
-                <span>Taxes</span>
-                <span>Loans</span>
-                <span>Stock Market</span>
-            </div>
-            <div id="trendingQuestions" class="trending-questions"></div>
-        </section>
+        <aside class="community-right" id="rightSidebar">
+            <section class="card info-panel">
+                <h3>About Community</h3>
+                <p>A safe anonymous space for Indian finance discussions. Learn and help others with practical money guidance.</p>
+            </section>
 
-        <section class="card ask-cta-panel">
-            <button id="askQuestionBtn" class="btn btn-primary ask-btn">Ask a Question</button>
-        </section>
-    </aside>
+            <section class="card info-panel" id="trending-panel">
+                <h3>Trending Topics</h3>
+                <div class="topic-tags">
+                    <span>SIP</span>
+                    <span>Mutual Funds</span>
+                    <span>Budget</span>
+                    <span>Taxes</span>
+                    <span>Loans</span>
+                    <span>Stock Market</span>
+                </div>
+                <div id="trendingQuestions" class="trending-questions"></div>
+            </section>
+
+            <section class="card ask-cta-panel">
+                <button id="askQuestionBtn" class="btn btn-primary ask-btn animated-btn">Ask Question</button>
+            </section>
+        </aside>
+    </section>
 </main>
 
 <script src="script.js"></script>

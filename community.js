@@ -4,11 +4,13 @@ import {
     watchPosts,
     watchCommentsByPost,
     upvotePost,
-    upvoteComment
+    upvoteComment,
+    upsertUserProfile
 } from "./community-db.js";
 import { getCommunityIdentity } from "./community-auth.js";
 
 const identityChip = document.getElementById("identityChip");
+const profileIconImage = document.getElementById("profileIconImage");
 const postForm = document.getElementById("postForm");
 const postTitle = document.getElementById("postTitle");
 const postContent = document.getElementById("postContent");
@@ -16,10 +18,11 @@ const postMessage = document.getElementById("postMessage");
 const postsFeed = document.getElementById("postsFeed");
 const trendingQuestions = document.getElementById("trendingQuestions");
 const askQuestionBtn = document.getElementById("askQuestionBtn");
+const heroAskBtn = document.getElementById("heroAskBtn");
 const threadView = document.getElementById("threadView");
 const myActivityText = document.getElementById("myActivityText");
 
-let viewer = { uid: null, username: "Guest", avatar: "" };
+let viewer = null;
 let postsCache = [];
 let activeCommentUnsub = null;
 
@@ -38,7 +41,7 @@ const escapeHtml = (value = "") => String(value)
 
 const formatTime = (ts) => ts?.toDate ? ts.toDate().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "just now";
 
-const avatarMarkup = (avatar, username) => `<img class="avatar" src="${escapeHtml(avatar)}" alt="${escapeHtml(username)} avatar" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;avatar avatar-fallback&quot; style=&quot;background:#5f7aa6;&quot;>${escapeHtml((username || 'U').slice(0,2).toUpperCase())}</span>'">`;
+const avatarMarkup = (avatar, username) => `<img class="avatar" src="${escapeHtml(avatar)}" alt="${escapeHtml(username)} avatar" loading="lazy" referrerpolicy="no-referrer">`;
 
 const postCardMarkup = (post) => `
 <article class="post-card card" data-post-id="${post.id}">
@@ -57,9 +60,9 @@ const postCardMarkup = (post) => `
         <h3 class="post-title">${escapeHtml(post.title)}</h3>
         <p class="post-text">${escapeHtml(post.content)}</p>
         <div class="post-actions">
-            <button type="button" data-action="open-thread" data-id="${post.id}">Comment</button>
-            <button type="button">Share</button>
-            <button type="button" data-action="upvote-post" data-id="${post.id}">Upvote</button>
+            <button type="button" class="action-btn" data-action="open-thread" data-id="${post.id}">Comment (${post.commentsCount || 0})</button>
+            <button type="button" class="action-btn" data-action="share-post" data-id="${post.id}">Share</button>
+            <button type="button" class="action-btn" data-action="upvote-post" data-id="${post.id}">Upvote</button>
         </div>
     </div>
 </article>`;
@@ -72,16 +75,13 @@ const renderTrending = () => {
 };
 
 const setActivity = () => {
-    const myPosts = postsCache.filter((post) => post.username === viewer.username).length;
+    const myPosts = postsCache.filter((post) => post.userId === viewer.uid).length;
     myActivityText.textContent = myPosts ? `You have posted ${myPosts} question${myPosts > 1 ? "s" : ""}.` : "No activity yet.";
 };
 
 const openThread = (postId) => {
     const post = postsCache.find((item) => item.id === postId);
-    if (!post) {
-        return;
-    }
-
+    if (!post) return;
     if (activeCommentUnsub) activeCommentUnsub();
 
     const url = new URL(window.location.href);
@@ -89,24 +89,43 @@ const openThread = (postId) => {
     window.history.replaceState({}, "", url);
 
     threadView.hidden = false;
-    threadView.innerHTML = `<h2>Discussion Thread</h2>${postCardMarkup(post)}<div id="commentList" class="comment-list"><p>Loading answers...</p></div>
-    <form id="commentForm" class="comment-form">
-        <input id="commentText" type="text" maxlength="400" placeholder="Write your answer" required>
-        <button class="btn btn-primary" type="submit">Add Answer</button>
-    </form>`;
+    threadView.innerHTML = `
+        <div class="post-actions"><button class="action-btn" data-action="close-thread">← Back to feed</button></div>
+        <h2>Discussion Thread</h2>
+        ${postCardMarkup(post)}
+        <div id="commentList" class="comment-list"><p>Loading answers...</p></div>
+        <form id="commentForm" class="comment-form">
+            <input id="commentText" type="text" maxlength="400" placeholder="Write your answer" required>
+            <button class="btn btn-primary animated-btn" type="submit">Add Answer</button>
+        </form>`;
 
     const commentList = document.getElementById("commentList");
     const commentForm = document.getElementById("commentForm");
     const commentText = document.getElementById("commentText");
 
     activeCommentUnsub = watchCommentsByPost(postId, (comments) => {
-        commentList.innerHTML = comments.length ? comments.map((comment) => `
+        const roots = comments.filter((item) => !item.parentCommentId);
+        const repliesMap = comments.filter((item) => item.parentCommentId).reduce((acc, item) => {
+            acc[item.parentCommentId] = [...(acc[item.parentCommentId] || []), item];
+            return acc;
+        }, {});
+
+        commentList.innerHTML = roots.length ? roots.map((comment) => `
             <article class="comment-item" data-comment-id="${comment.id}">
                 <div class="post-head">${avatarMarkup(comment.avatar, comment.username)}<div><div class="username">${escapeHtml(comment.username)}</div><div class="timestamp">${formatTime(comment.timestamp)}</div></div></div>
                 <p>${escapeHtml(comment.text)}</p>
-                <button class="vote-btn" data-action="upvote-comment" data-id="${comment.id}">▲ ${comment.upvotes || 0}</button>
-            </article>
-        `).join("") : "<p>No answers yet.</p>";
+                <div class="post-actions">
+                    <button class="vote-btn" data-action="upvote-comment" data-id="${comment.id}" data-owner="${comment.userId || ""}">▲ ${comment.upvotes || 0}</button>
+                    <button class="action-btn" data-action="toggle-reply" data-id="${comment.id}">Reply</button>
+                </div>
+                <form class="reply-form" data-reply-form="${comment.id}" hidden>
+                    <input type="text" maxlength="300" placeholder="Write a reply" required>
+                    <button class="btn btn-primary" type="submit">Post Reply</button>
+                </form>
+                <div class="reply-list">
+                    ${(repliesMap[comment.id] || []).map((reply) => `<div class="reply-item"><strong>${escapeHtml(reply.username)}</strong>: ${escapeHtml(reply.text)}</div>`).join("")}
+                </div>
+            </article>`).join("") : "<p>No answers yet.</p>";
     }, () => {
         commentList.innerHTML = "<p>Unable to load answers. Configure Firebase credentials.</p>";
     });
@@ -115,8 +134,7 @@ const openThread = (postId) => {
         event.preventDefault();
         const text = commentText.value.trim();
         if (!text) return;
-
-        await createComment({ postId, username: viewer.username, avatar: viewer.avatar, text });
+        await createComment({ postId, userId: viewer.uid, username: viewer.username, avatar: viewer.avatar, text });
         commentText.value = "";
     });
 
@@ -134,10 +152,10 @@ postForm.addEventListener("submit", async (event) => {
     }
 
     try {
-        await createPost({ username: viewer.username, avatar: viewer.avatar, title, content });
+        await createPost({ userId: viewer.uid, username: viewer.username, avatar: viewer.avatar, title, content });
         postTitle.value = "";
         postContent.value = "";
-        postMessage.textContent = "Posted successfully.";
+        postMessage.textContent = "Posted successfully ✓";
     } catch (error) {
         postMessage.textContent = "Unable to post. Add valid Firebase config and auth rules.";
     }
@@ -146,7 +164,6 @@ postForm.addEventListener("submit", async (event) => {
 postsFeed.addEventListener("click", async (event) => {
     const target = event.target.closest("button, .post-card");
     if (!target) return;
-
     const action = target.dataset.action;
     const id = target.dataset.id || target.closest(".post-card")?.dataset.postId;
 
@@ -155,34 +172,90 @@ postsFeed.addEventListener("click", async (event) => {
         return;
     }
 
+    if (action === "share-post") {
+        navigator.clipboard?.writeText(`${window.location.origin}${window.location.pathname}?post=${id}`);
+        return;
+    }
+
     if (action === "upvote-post") {
         const voted = getVoted(votedPostKey);
         if (voted.has(id)) return;
         voted.add(id);
         saveVoted(votedPostKey, voted);
-        await upvotePost(id);
+        const post = postsCache.find((item) => item.id === id);
+        await upvotePost({ postId: id, ownerId: post?.userId });
     }
 });
 
-threadView.addEventListener("click", async (event) => {
-    const target = event.target.closest("[data-action='upvote-comment']");
-    if (!target) return;
-    const id = target.dataset.id;
-    const voted = getVoted(votedCommentKey);
-    if (voted.has(id)) return;
-    voted.add(id);
-    saveVoted(votedCommentKey, voted);
-    await upvoteComment(id);
+trendingQuestions.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-action='open-thread']");
+    if (!button) return;
+    openThread(button.dataset.id);
 });
 
-askQuestionBtn.addEventListener("click", () => {
+threadView.addEventListener("click", async (event) => {
+    const target = event.target.closest("button");
+    if (!target) return;
+
+    if (target.dataset.action === "close-thread") {
+        threadView.hidden = true;
+        const url = new URL(window.location.href);
+        url.searchParams.delete("post");
+        window.history.replaceState({}, "", url);
+        return;
+    }
+
+    if (target.dataset.action === "toggle-reply") {
+        const form = threadView.querySelector(`[data-reply-form='${target.dataset.id}']`);
+        if (form) form.hidden = !form.hidden;
+        return;
+    }
+
+    if (target.dataset.action === "upvote-comment") {
+        const id = target.dataset.id;
+        const voted = getVoted(votedCommentKey);
+        if (voted.has(id)) return;
+        voted.add(id);
+        saveVoted(votedCommentKey, voted);
+        await upvoteComment({ commentId: id, ownerId: target.dataset.owner || null });
+    }
+});
+
+threadView.addEventListener("submit", async (event) => {
+    const form = event.target.closest(".reply-form");
+    if (!form) return;
+    event.preventDefault();
+
+    const input = form.querySelector("input");
+    const text = input.value.trim();
+    if (!text) return;
+
+    const postId = new URLSearchParams(window.location.search).get("post");
+    const parentCommentId = form.dataset.replyForm;
+    await createComment({ postId, userId: viewer.uid, username: viewer.username, avatar: viewer.avatar, text, parentCommentId });
+    input.value = "";
+    form.hidden = true;
+});
+
+const scrollToAsk = () => {
     document.getElementById("ask-box").scrollIntoView({ behavior: "smooth" });
     postTitle.focus();
-});
+};
+
+askQuestionBtn.addEventListener("click", scrollToAsk);
+heroAskBtn.addEventListener("click", scrollToAsk);
 
 const init = async () => {
     viewer = await getCommunityIdentity();
     identityChip.textContent = `Signed in anonymously as ${viewer.username}`;
+    profileIconImage.src = viewer.avatar;
+
+    try {
+        await upsertUserProfile(viewer);
+    } catch (error) {
+        console.warn("User sync unavailable.", error);
+    }
+
 
     watchPosts((posts) => {
         postsCache = posts;

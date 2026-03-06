@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rupaya Saathi | Profile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+<header class="site-header">
+    <nav class="navbar container">
+        <a class="logo" href="index.html">Rupaya Saathi</a>
+        <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="calculators.html">Calculators</a></li>
+            <li><a href="community.html">Community</a></li>
+            <li><a href="blogs.html">Blogs</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="page-main">
+    <section class="container profile-grid">
+        <article class="card profile-card">
+            <div class="profile-head">
+                <img id="profileAvatar" class="avatar profile-avatar" alt="Profile avatar" loading="lazy">
+                <div>
+                    <h1 id="profileUsername">Anonymous User</h1>
+                    <p id="profileJoinDate" class="timestamp">Joined recently</p>
+                </div>
+            </div>
+            <div class="profile-stats" id="profileStats">
+                <article class="profile-stat"><strong id="postsCount">0</strong><p>Posts</p></article>
+                <article class="profile-stat"><strong id="answersCount">0</strong><p>Answers</p></article>
+                <article class="profile-stat"><strong id="upvotesCount">0</strong><p>Upvotes Received</p></article>
+            </div>
+            <a href="community.html" class="btn btn-primary">Back to Community</a>
+        </article>
+
+        <article class="card">
+            <h2>My Recent Questions</h2>
+            <div id="myPostsList" class="my-posts-list">
+                <p>No posts yet.</p>
+            </div>
+        </article>
+    </section>
+</main>
+
+<script src="script.js"></script>
+<script type="module" src="profile.js"></script>
+</body>
+</html>
