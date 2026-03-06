@@ -25,76 +25,63 @@
     </nav>
 </header>
 
-<main class="community-main">
-    <section class="community-hero container card">
-        <div class="word-cloud" aria-hidden="true">
-            <span>Paisa</span><span>Rupai</span><span>Lakshmi</span><span>Nivesh</span><span>Savings</span>
-            <span>Budget</span><span>Dhan</span><span>Future</span><span>Growth</span>
-        </div>
-        <h1>Ask the Rupaya Saathi Community</h1>
-        <p>Discuss investments, savings, taxes and financial decisions with fellow Indians.</p>
-        <p class="tagline">"From SIP to taxes — ask anything about paisa."</p>
+<main class="community-main container">
+    <aside class="community-left card">
+        <h2>Community</h2>
+        <p id="identityChip" class="identity-chip">Signing in anonymously...</p>
+        <nav class="shortcut-nav" aria-label="Community shortcuts">
+            <a href="#feed" class="shortcut-item"><span>🏠</span>Home Feed</a>
+            <a href="#ask-box" class="shortcut-item"><span>❓</span>Ask Question</a>
+            <a href="#trending-panel" class="shortcut-item"><span>📈</span>Trending Questions</a>
+            <a href="#my-activity" class="shortcut-item"><span>🧾</span>My Activity</a>
+        </nav>
+    </aside>
 
-        <div class="hero-question-box">
-            <label for="heroQuestionInput">Ask a Question</label>
-            <input id="heroQuestionInput" type="text" placeholder="Ask a Question" aria-label="Ask a question">
-        </div>
+    <section class="community-feed" id="feed">
+        <article class="card ask-box" id="ask-box">
+            <h1>Ask the Community</h1>
+            <p>Discuss investments, taxes, savings and financial planning with fellow Indians.</p>
+            <form id="postForm" class="post-form" novalidate>
+                <input id="postTitle" type="text" placeholder="Post title" maxlength="120" required>
+                <textarea id="postContent" rows="3" placeholder="Describe your question in detail" maxlength="700" required></textarea>
+                <button type="submit" class="btn btn-primary">Post Question</button>
+                <p id="postMessage" class="post-message" aria-live="polite"></p>
+            </form>
+        </article>
 
-        <div class="community-meta">
-            <span id="usernameChip" class="meta-chip"></span>
-            <span id="questionCounter" class="meta-chip">0 live questions</span>
-        </div>
+        <section class="thread-view card" id="threadView" hidden aria-live="polite"></section>
+
+        <section id="my-activity" class="card my-activity">
+            <h2>My Activity</h2>
+            <p id="myActivityText">No activity yet.</p>
+        </section>
+
+        <section id="postsFeed" class="posts-feed" aria-live="polite"></section>
     </section>
 
-    <section class="container community-layout">
-        <div>
-            <section class="card ask-card">
-                <h2>Ask in Live Community Bar</h2>
-                <form id="questionForm" class="live-question-form" novalidate>
-                    <div class="live-bar-label">
-                        <span class="live-dot"></span>
-                        <span>Live Ask Stream</span>
-                    </div>
-                    <div class="live-bar-row">
-                        <input id="questionTitle" name="questionTitle" type="text" maxlength="120" placeholder="Ask your question title" required>
-                        <input id="questionDescription" name="questionDescription" type="text" maxlength="600" placeholder="Add details (e.g., SIP, tax, loan, budget)" required>
-                        <button type="submit" class="btn btn-primary">Post</button>
-                    </div>
+    <aside class="community-right">
+        <section class="card info-panel">
+            <h3>About the Community</h3>
+            <p>Discuss investments, taxes, savings and financial planning with fellow Indians.</p>
+        </section>
 
-                    <label for="questionTags">Question Tags</label>
-                    <div class="tag-options" id="questionTags">
-                        <label><input type="checkbox" value="Tax">Tax</label>
-                        <label><input type="checkbox" value="SIP">SIP</label>
-                        <label><input type="checkbox" value="Mutual Funds">Mutual Funds</label>
-                        <label><input type="checkbox" value="Loans">Loans</label>
-                        <label><input type="checkbox" value="Budget">Budget</label>
-                        <label><input type="checkbox" value="Stock Market">Stock Market</label>
-                    </div>
+        <section class="card info-panel" id="trending-panel">
+            <h3>Trending Topics</h3>
+            <div class="topic-tags">
+                <span>SIP</span>
+                <span>Mutual Funds</span>
+                <span>Budget</span>
+                <span>Taxes</span>
+                <span>Loans</span>
+                <span>Stock Market</span>
+            </div>
+            <div id="trendingQuestions" class="trending-questions"></div>
+        </section>
 
-                    <p id="questionFeedback" class="community-feedback" aria-live="polite"></p>
-                </form>
-            </section>
-
-            <section class="card live-ticker-card" aria-label="Live community updates">
-                <div class="ticker-title">Live Discussion Bar</div>
-                <div class="ticker-track-wrap">
-                    <div id="liveTickerTrack" class="ticker-track">
-                        <span>Loading latest community questions...</span>
-                    </div>
-                </div>
-            </section>
-
-            <section>
-                <h2 class="section-title">Latest Questions</h2>
-                <div id="questionsList" class="question-list" aria-live="polite"></div>
-            </section>
-        </div>
-
-        <aside class="card trending-card">
-            <h2>Trending Questions</h2>
-            <div id="trendingList" class="trending-list"></div>
-        </aside>
-    </section>
+        <section class="card ask-cta-panel">
+            <button id="askQuestionBtn" class="btn btn-primary ask-btn">Ask a Question</button>
+        </section>
+    </aside>
 </main>
 
 <script src="script.js"></script>

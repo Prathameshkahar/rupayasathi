@@ -1,303 +1,202 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
-    getFirestore,
-    collection,
-    addDoc,
-    doc,
-    updateDoc,
-    increment,
-    serverTimestamp,
-    query,
-    orderBy,
-    onSnapshot,
-    where
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+    createPost,
+    createComment,
+    watchPosts,
+    watchCommentsByPost,
+    upvotePost,
+    upvoteComment
+} from "./community-db.js";
+import { getCommunityIdentity } from "./community-auth.js";
 
-// Replace with your Firebase project configuration.
-const firebaseConfig = {
-    apiKey: "REPLACE_WITH_API_KEY",
-    authDomain: "REPLACE_WITH_AUTH_DOMAIN",
-    projectId: "REPLACE_WITH_PROJECT_ID",
-    storageBucket: "REPLACE_WITH_STORAGE_BUCKET",
-    messagingSenderId: "REPLACE_WITH_SENDER_ID",
-    appId: "REPLACE_WITH_APP_ID"
-};
+const identityChip = document.getElementById("identityChip");
+const postForm = document.getElementById("postForm");
+const postTitle = document.getElementById("postTitle");
+const postContent = document.getElementById("postContent");
+const postMessage = document.getElementById("postMessage");
+const postsFeed = document.getElementById("postsFeed");
+const trendingQuestions = document.getElementById("trendingQuestions");
+const askQuestionBtn = document.getElementById("askQuestionBtn");
+const threadView = document.getElementById("threadView");
+const myActivityText = document.getElementById("myActivityText");
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+let viewer = { uid: null, username: "Guest", avatar: "" };
+let postsCache = [];
+let activeCommentUnsub = null;
 
-const prefixes = ["Paisa", "Rupai", "Lakshmi", "Desi", "Naya", "Smart", "Budget", "Saving"];
-const suffixes = ["Investor", "Trader", "Guru", "Yodha", "Planner", "Seeker", "Ninja", "Builder"];
+const votedPostKey = "communityVotedPosts";
+const votedCommentKey = "communityVotedComments";
 
-const usernameChip = document.getElementById("usernameChip");
-const questionCounter = document.getElementById("questionCounter");
-const questionForm = document.getElementById("questionForm");
-const questionFeedback = document.getElementById("questionFeedback");
-const questionsList = document.getElementById("questionsList");
-const trendingList = document.getElementById("trendingList");
-const liveTickerTrack = document.getElementById("liveTickerTrack");
-const heroQuestionInput = document.getElementById("heroQuestionInput");
-const titleInput = document.getElementById("questionTitle");
+const getVoted = (key) => new Set(JSON.parse(localStorage.getItem(key) || "[]"));
+const saveVoted = (key, values) => localStorage.setItem(key, JSON.stringify([...values]));
 
-
-const answersCache = new Map();
-let currentUsername = localStorage.getItem("username");
-
-if (!currentUsername) {
-    const randomName = `${prefixes[Math.floor(Math.random() * prefixes.length)]}${suffixes[Math.floor(Math.random() * suffixes.length)]}`;
-    localStorage.setItem("username", randomName);
-    currentUsername = randomName;
-}
-
-usernameChip.textContent = `Posting as ${currentUsername}`;
-
-const escapeHtml = (value) => String(value)
+const escapeHtml = (value = "") => String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 
+const formatTime = (ts) => ts?.toDate ? ts.toDate().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "just now";
 
-const formatTime = (timestamp) => {
-    if (!timestamp?.toDate) {
-        return "just now";
-    }
-    return timestamp.toDate().toLocaleString("en-IN", {
-        dateStyle: "medium",
-        timeStyle: "short"
-    });
+const avatarMarkup = (avatar, username) => `<img class="avatar" src="${escapeHtml(avatar)}" alt="${escapeHtml(username)} avatar" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;avatar avatar-fallback&quot; style=&quot;background:#5f7aa6;&quot;>${escapeHtml((username || 'U').slice(0,2).toUpperCase())}</span>'">`;
+
+const postCardMarkup = (post) => `
+<article class="post-card card" data-post-id="${post.id}">
+    <div class="vote-col">
+        <button class="vote-btn" data-action="upvote-post" data-id="${post.id}" aria-label="Upvote post">▲</button>
+        <strong>${post.upvotes || 0}</strong>
+    </div>
+    <div>
+        <div class="post-head">
+            ${avatarMarkup(post.avatar, post.username)}
+            <div>
+                <div class="username">${escapeHtml(post.username)}</div>
+                <div class="timestamp">${formatTime(post.timestamp)}</div>
+            </div>
+        </div>
+        <h3 class="post-title">${escapeHtml(post.title)}</h3>
+        <p class="post-text">${escapeHtml(post.content)}</p>
+        <div class="post-actions">
+            <button type="button" data-action="open-thread" data-id="${post.id}">Comment</button>
+            <button type="button">Share</button>
+            <button type="button" data-action="upvote-post" data-id="${post.id}">Upvote</button>
+        </div>
+    </div>
+</article>`;
+
+const renderTrending = () => {
+    const ranked = [...postsCache].sort((a, b) => (b.upvotes || 0) - (a.upvotes || 0)).slice(0, 5);
+    trendingQuestions.innerHTML = ranked.length
+        ? ranked.map((post) => `<button class="shortcut-item" data-action="open-thread" data-id="${post.id}">${escapeHtml(post.title)}</button>`).join("")
+        : "<p>No trending questions yet.</p>";
 };
 
+const setActivity = () => {
+    const myPosts = postsCache.filter((post) => post.username === viewer.username).length;
+    myActivityText.textContent = myPosts ? `You have posted ${myPosts} question${myPosts > 1 ? "s" : ""}.` : "No activity yet.";
+};
 
-const focusAskInput = () => {
-    if (!titleInput) {
+const openThread = (postId) => {
+    const post = postsCache.find((item) => item.id === postId);
+    if (!post) {
         return;
     }
-    titleInput.focus();
-    titleInput.scrollIntoView({ behavior: "smooth", block: "center" });
-};
 
-if (heroQuestionInput) {
-    heroQuestionInput.addEventListener("focus", focusAskInput);
-    heroQuestionInput.addEventListener("keydown", (event) => {
-        if (event.key !== "Enter") {
-            return;
-        }
+    if (activeCommentUnsub) activeCommentUnsub();
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("post", postId);
+    window.history.replaceState({}, "", url);
+
+    threadView.hidden = false;
+    threadView.innerHTML = `<h2>Discussion Thread</h2>${postCardMarkup(post)}<div id="commentList" class="comment-list"><p>Loading answers...</p></div>
+    <form id="commentForm" class="comment-form">
+        <input id="commentText" type="text" maxlength="400" placeholder="Write your answer" required>
+        <button class="btn btn-primary" type="submit">Add Answer</button>
+    </form>`;
+
+    const commentList = document.getElementById("commentList");
+    const commentForm = document.getElementById("commentForm");
+    const commentText = document.getElementById("commentText");
+
+    activeCommentUnsub = watchCommentsByPost(postId, (comments) => {
+        commentList.innerHTML = comments.length ? comments.map((comment) => `
+            <article class="comment-item" data-comment-id="${comment.id}">
+                <div class="post-head">${avatarMarkup(comment.avatar, comment.username)}<div><div class="username">${escapeHtml(comment.username)}</div><div class="timestamp">${formatTime(comment.timestamp)}</div></div></div>
+                <p>${escapeHtml(comment.text)}</p>
+                <button class="vote-btn" data-action="upvote-comment" data-id="${comment.id}">▲ ${comment.upvotes || 0}</button>
+            </article>
+        `).join("") : "<p>No answers yet.</p>";
+    }, () => {
+        commentList.innerHTML = "<p>Unable to load answers. Configure Firebase credentials.</p>";
+    });
+
+    commentForm.addEventListener("submit", async (event) => {
         event.preventDefault();
-        const value = heroQuestionInput.value.trim();
-        if (value && !titleInput.value.trim()) {
-            titleInput.value = value;
-        }
-        focusAskInput();
-    });
-}
+        const text = commentText.value.trim();
+        if (!text) return;
 
-const params = new URLSearchParams(window.location.search);
-if (params.get("focus") === "ask") {
-    const quickQuestion = params.get("q");
-    if (quickQuestion && titleInput && !titleInput.value.trim()) {
-        titleInput.value = quickQuestion.slice(0, 120);
-    }
-    requestAnimationFrame(focusAskInput);
-}
-
-const selectedTags = () => Array.from(document.querySelectorAll("#questionTags input:checked")).map((item) => item.value);
-
-const trendingHtml = (questions) => {
-    if (!questions.length) {
-        trendingList.innerHTML = "<p>No questions yet. Be the first to ask!</p>";
-        return;
-    }
-
-    const ranked = [...questions].sort((a, b) => {
-        const scoreA = (a.upvotes || 0) + (answersCache.get(a.id)?.length || 0);
-        const scoreB = (b.upvotes || 0) + (answersCache.get(b.id)?.length || 0);
-        return scoreB - scoreA;
-    }).slice(0, 5);
-
-    trendingList.innerHTML = ranked.map((question) => `
-        <div class="trending-item">
-            <strong>${escapeHtml(question.title)}</strong>
-            <span>${question.upvotes || 0} upvotes • ${(answersCache.get(question.id) || []).length} answers</span>
-        </div>
-    `).join("");
-};
-
-const answerMarkup = (answer) => `
-    <article class="answer-item">
-        <p>${escapeHtml(answer.text)}</p>
-        <div class="answer-meta">By ${escapeHtml(answer.username)} • ${formatTime(answer.timestamp)}</div>
-        <div class="answer-actions">
-            <button type="button" class="btn-mini btn-upvote" data-type="answer" data-id="${answer.id}">▲ Upvote (${answer.upvotes || 0})</button>
-        </div>
-    </article>
-`;
-
-const createQuestionMarkup = (question) => {
-    const answers = answersCache.get(question.id) || [];
-
-    return `
-        <article class="question-card" data-question-id="${question.id}">
-            <div class="question-title-row">
-                <h3>${escapeHtml(question.title)}</h3>
-                <button type="button" class="btn-mini btn-upvote" data-type="question" data-id="${question.id}">▲ Upvote (${question.upvotes || 0})</button>
-            </div>
-            <p>${escapeHtml(question.description)}</p>
-            <p class="question-meta">Asked by: ${escapeHtml(question.username)} • ${formatTime(question.timestamp)}</p>
-            ${question.tags?.length ? `<div class="question-tags">${question.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
-            <div class="question-actions">
-                <button type="button" class="btn-mini" data-action="toggle-answers">View Answers (${answers.length})</button>
-                <button type="button" class="btn-mini" data-action="toggle-answer-form">Answer</button>
-            </div>
-
-            <section class="answer-panel" data-role="answer-panel" hidden>
-                <form class="answer-form" data-question-id="${question.id}">
-                    <label>Write your answer</label>
-                    <textarea rows="3" maxlength="400" required></textarea>
-                    <button type="submit" class="btn btn-primary">Submit answer</button>
-                </form>
-                <div class="answers-container">
-                    ${answers.map(answerMarkup).join("") || "<p>No answers yet.</p>"}
-                </div>
-            </section>
-        </article>
-    `;
-};
-
-const attachAnswerListener = (questionId) => {
-    const answerQuery = query(collection(db, "answers"), where("questionId", "==", questionId), orderBy("timestamp", "desc"));
-    onSnapshot(answerQuery, (snapshot) => {
-        const answers = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
-        answersCache.set(questionId, answers);
-
-        const answersContainer = document.querySelector(`[data-question-id="${questionId}"] .answers-container`);
-        const answerToggle = document.querySelector(`[data-question-id="${questionId}"] [data-action="toggle-answers"]`);
-
-        if (answerToggle) {
-            answerToggle.textContent = `View Answers (${answers.length})`;
-        }
-
-        if (answersContainer) {
-            answersContainer.innerHTML = answers.length ? answers.map(answerMarkup).join("") : "<p>No answers yet.</p>";
-        }
-    });
-};
-
-
-const updateLiveTicker = (questions) => {
-    if (!liveTickerTrack) {
-        return;
-    }
-
-    if (!questions.length) {
-        liveTickerTrack.innerHTML = "<span>Be the first to ask your money question in the live bar.</span>";
-        return;
-    }
-
-    const latest = questions.slice(0, 10).map((item) => `<span>${escapeHtml(item.title)}</span>`);
-    liveTickerTrack.innerHTML = [...latest, ...latest].join("");
-};
-
-const questionsQuery = query(collection(db, "questions"), orderBy("timestamp", "desc"));
-onSnapshot(questionsQuery, (snapshot) => {
-    const questions = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
-
-    questionCounter.textContent = `${questions.length} live questions`;
-    questionsList.innerHTML = questions.length ? questions.map(createQuestionMarkup).join("") : "<p>No questions posted yet.</p>";
-
-    questions.forEach((question) => {
-        if (!answersCache.has(question.id)) {
-            attachAnswerListener(question.id);
-        }
+        await createComment({ postId, username: viewer.username, avatar: viewer.avatar, text });
+        commentText.value = "";
     });
 
-    trendingHtml(questions);
-    updateLiveTicker(questions);
-});
+    threadView.scrollIntoView({ behavior: "smooth", block: "start" });
+};
 
-questionForm.addEventListener("submit", async (event) => {
+postForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    const title = postTitle.value.trim();
+    const content = postContent.value.trim();
 
-    const title = document.getElementById("questionTitle").value.trim();
-    const description = document.getElementById("questionDescription").value.trim();
-    const tags = selectedTags();
-
-    if (!title || !description) {
-        questionFeedback.textContent = "Please enter both title and description.";
+    if (!title || !content) {
+        postMessage.textContent = "Please add title and description.";
         return;
     }
 
     try {
-        await addDoc(collection(db, "questions"), {
-            title,
-            description,
-            tags,
-            username: currentUsername,
-            timestamp: serverTimestamp(),
-            upvotes: 0
-        });
-        questionForm.reset();
-        questionFeedback.textContent = "Question posted successfully.";
+        await createPost({ username: viewer.username, avatar: viewer.avatar, title, content });
+        postTitle.value = "";
+        postContent.value = "";
+        postMessage.textContent = "Posted successfully.";
     } catch (error) {
-        questionFeedback.textContent = "Unable to post question. Please configure Firebase and try again.";
-        console.error(error);
+        postMessage.textContent = "Unable to post. Add valid Firebase config and auth rules.";
     }
 });
 
-questionsList.addEventListener("click", async (event) => {
-    const upvoteButton = event.target.closest(".btn-upvote");
-    if (upvoteButton) {
-        const id = upvoteButton.dataset.id;
-        const type = upvoteButton.dataset.type;
-        const collectionName = type === "question" ? "questions" : "answers";
+postsFeed.addEventListener("click", async (event) => {
+    const target = event.target.closest("button, .post-card");
+    if (!target) return;
 
-        upvoteButton.classList.add("is-pulsing");
-        setTimeout(() => upvoteButton.classList.remove("is-pulsing"), 320);
-        try {
-            await updateDoc(doc(db, collectionName, id), { upvotes: increment(1) });
-        } catch (error) {
-            console.error(error);
+    const action = target.dataset.action;
+    const id = target.dataset.id || target.closest(".post-card")?.dataset.postId;
+
+    if (action === "open-thread" || target.classList.contains("post-card")) {
+        openThread(id);
+        return;
+    }
+
+    if (action === "upvote-post") {
+        const voted = getVoted(votedPostKey);
+        if (voted.has(id)) return;
+        voted.add(id);
+        saveVoted(votedPostKey, voted);
+        await upvotePost(id);
+    }
+});
+
+threadView.addEventListener("click", async (event) => {
+    const target = event.target.closest("[data-action='upvote-comment']");
+    if (!target) return;
+    const id = target.dataset.id;
+    const voted = getVoted(votedCommentKey);
+    if (voted.has(id)) return;
+    voted.add(id);
+    saveVoted(votedCommentKey, voted);
+    await upvoteComment(id);
+});
+
+askQuestionBtn.addEventListener("click", () => {
+    document.getElementById("ask-box").scrollIntoView({ behavior: "smooth" });
+    postTitle.focus();
+});
+
+const init = async () => {
+    viewer = await getCommunityIdentity();
+    identityChip.textContent = `Signed in anonymously as ${viewer.username}`;
+
+    watchPosts((posts) => {
+        postsCache = posts;
+        postsFeed.innerHTML = posts.length ? posts.map(postCardMarkup).join("") : "<article class='card'>No questions yet. Ask the first question.</article>";
+        renderTrending();
+        setActivity();
+
+        const selected = new URLSearchParams(window.location.search).get("post");
+        if (selected && posts.some((item) => item.id === selected)) {
+            openThread(selected);
         }
-        return;
-    }
+    }, () => {
+        postsFeed.innerHTML = "<article class='card'>Unable to load real-time feed. Update firebase-config.js and Firestore rules.</article>";
+    });
+};
 
-    const questionCard = event.target.closest(".question-card");
-    if (!questionCard) {
-        return;
-    }
-
-    const panel = questionCard.querySelector('[data-role="answer-panel"]');
-
-    if (event.target.matches('[data-action="toggle-answers"], [data-action="toggle-answer-form"]')) {
-        panel.hidden = !panel.hidden;
-    }
-});
-
-questionsList.addEventListener("submit", async (event) => {
-    const form = event.target.closest(".answer-form");
-    if (!form) {
-        return;
-    }
-
-    event.preventDefault();
-
-    const textarea = form.querySelector("textarea");
-    const text = textarea.value.trim();
-    if (!text) {
-        return;
-    }
-
-    try {
-        await addDoc(collection(db, "answers"), {
-            questionId: form.dataset.questionId,
-            text,
-            username: currentUsername,
-            timestamp: serverTimestamp(),
-            upvotes: 0
-        });
-        form.reset();
-    } catch (error) {
-        console.error(error);
-    }
-});
+init();
