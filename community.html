@@ -22,20 +22,20 @@
             <li><a href="blogs.html">Blogs</a></li>
             <li><a href="contact.html">Contact</a></li>
         </ul>
-        <button id="profileIconBtn" class="profile-icon-btn" type="button" aria-label="Open profile panel">
-            <img id="profileIconImage" class="profile-icon-image" alt="Profile avatar" loading="lazy">
-        </button>
+        <a id="profileIconBtn" class="community-profile-icon-btn" href="profile.html" aria-label="Open profile page">
+            <img id="profileIconImage" class="community-profile-icon-image" alt="Profile avatar" loading="lazy">
+        </a>
     </nav>
 </header>
 
 <main class="community-shell">
     <section class="community-hero">
-        <video class="hero-video" autoplay muted loop playsinline poster="assets/demo-home.svg">
+        <video class="community-hero-video" autoplay muted loop playsinline poster="assets/demo-home.svg">
             <source src="https://cdn.coverr.co/videos/coverr-analysing-stock-market-data-1579/1080p.mp4" type="video/mp4">
         </video>
-        <div class="hero-overlay"></div>
-        <div class="hero-content container">
-            <p class="hero-tag">Rupaya Saathi Community</p>
+        <div class="community-hero-overlay"></div>
+        <div class="community-hero-content container">
+            <p class="community-hero-tag">Rupaya Saathi Community</p>
             <h1>Ask, Answer & Grow with Anonymous Finance Discussions</h1>
             <p>Real-time conversations on saving, investing, taxation and money management.</p>
             <button id="heroAskBtn" class="btn btn-primary">Ask a Question</button>
@@ -43,48 +43,48 @@
     </section>
 
     <section class="community-main container">
-        <aside class="community-left card" id="leftSidebar">
+        <aside class="community-sidebar community-sidebar-left card" id="leftSidebar">
             <h2>Community</h2>
-            <p id="identityChip" class="identity-chip">Signing in anonymously...</p>
-            <nav class="shortcut-nav" aria-label="Community shortcuts">
-                <a href="#feed" class="shortcut-item"><span>🏠</span>Home Feed</a>
-                <a href="#ask-box" class="shortcut-item"><span>❓</span>Ask Question</a>
-                <a href="#trending-panel" class="shortcut-item"><span>📈</span>Trending</a>
-                <a href="#my-activity" class="shortcut-item"><span>🧾</span>My Activity</a>
+            <p id="identityChip" class="community-identity-chip">Signing in anonymously...</p>
+            <nav class="community-shortcut-nav" aria-label="Community shortcuts">
+                <a href="#feed" class="community-shortcut-item"><span>🏠</span>Home Feed</a>
+                <a href="#ask-box" class="community-shortcut-item"><span>❓</span>Ask Question</a>
+                <a href="#trending-panel" class="community-shortcut-item"><span>📈</span>Trending</a>
+                <a href="#my-activity" class="community-shortcut-item"><span>🧾</span>My Activity</a>
             </nav>
         </aside>
 
         <section class="community-feed" id="feed">
-            <article class="card ask-box" id="ask-box">
+            <article class="card community-ask-box" id="ask-box">
                 <h2>Start a Discussion</h2>
                 <p>Get help from the community with practical, anonymous finance questions.</p>
-                <form id="postForm" class="post-form" novalidate>
+                <form id="postForm" class="community-post-form" novalidate>
                     <input id="postTitle" type="text" placeholder="Post title" maxlength="120" required>
                     <textarea id="postContent" rows="4" placeholder="Describe your question in detail" maxlength="700" required></textarea>
-                    <button type="submit" class="btn btn-primary animated-btn">Post Question</button>
-                    <p id="postMessage" class="post-message" aria-live="polite"></p>
+                    <button type="submit" class="btn btn-primary community-animated-btn">Post Question</button>
+                    <p id="postMessage" class="community-post-message" aria-live="polite"></p>
                 </form>
             </article>
 
-            <section class="thread-view card" id="threadView" hidden aria-live="polite"></section>
+            <section class="card community-thread-view" id="threadView" hidden aria-live="polite"></section>
 
-            <section id="my-activity" class="card my-activity">
+            <section id="my-activity" class="card community-my-activity">
                 <h3>My Activity</h3>
                 <p id="myActivityText">No activity yet.</p>
             </section>
 
-            <section id="postsFeed" class="posts-feed" aria-live="polite"></section>
+            <section id="postsFeed" class="community-posts-feed" aria-live="polite"></section>
         </section>
 
-        <aside class="community-right" id="rightSidebar">
-            <section class="card info-panel">
+        <aside class="community-sidebar community-sidebar-right" id="rightSidebar">
+            <section class="card community-info-panel">
                 <h3>About Community</h3>
                 <p>A safe anonymous space for Indian finance discussions. Learn and help others with practical money guidance.</p>
             </section>
 
-            <section class="card info-panel" id="trending-panel">
+            <section class="card community-info-panel" id="trending-panel">
                 <h3>Trending Topics</h3>
-                <div class="topic-tags">
+                <div class="community-topic-tags">
                     <span>SIP</span>
                     <span>Mutual Funds</span>
                     <span>Budget</span>
@@ -92,25 +92,15 @@
                     <span>Loans</span>
                     <span>Stock Market</span>
                 </div>
-                <div id="trendingQuestions" class="trending-questions"></div>
+                <div id="trendingQuestions" class="community-trending-questions"></div>
             </section>
 
-            <section class="card ask-cta-panel">
-                <button id="askQuestionBtn" class="btn btn-primary ask-btn animated-btn">Ask Question</button>
+            <section class="card community-ask-cta-panel">
+                <button id="askQuestionBtn" class="btn btn-primary community-ask-btn community-animated-btn">Ask Question</button>
             </section>
         </aside>
     </section>
 </main>
-
-<section id="profilePanel" class="profile-panel" hidden>
-    <div class="profile-panel-content card">
-        <div class="profile-panel-head">
-            <h3>My Anonymous Profile</h3>
-            <button id="profilePanelClose" type="button" class="panel-close" aria-label="Close profile panel">✕</button>
-        </div>
-        <div id="profilePanelBody"></div>
-    </div>
-</section>
 
 <script src="script.js"></script>
 <script type="module" src="community.js"></script>

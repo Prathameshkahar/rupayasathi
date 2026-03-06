@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rupaya Saathi | Profile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="profile.css">
+</head>
+<body>
+<header class="site-header">
+    <nav class="navbar container">
+        <a class="logo" href="index.html">Rupaya Saathi</a>
+        <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="calculators.html">Calculators</a></li>
+            <li><a href="community.html">Community</a></li>
+            <li><a href="blogs.html">Blogs</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+        <a class="profile-profile-icon-btn" href="profile.html" aria-label="Profile page">
+            <img id="profileNavAvatar" class="profile-profile-icon-image" alt="Profile avatar" loading="lazy">
+        </a>
+    </nav>
+</header>
+
+<main class="profile-page-main container">
+    <section class="card profile-header-card">
+        <img id="profileAvatar" class="profile-avatar" alt="Profile avatar" loading="lazy">
+        <div>
+            <h1 id="profileUsername" class="profile-username">Loading profile...</h1>
+            <p id="profileJoinDate" class="profile-join-date">Please wait while we fetch your profile.</p>
+        </div>
+    </section>
+
+    <section class="profile-stats-grid">
+        <article class="card profile-stat-card"><p>Posts created</p><strong id="postsCount">0</strong></article>
+        <article class="card profile-stat-card"><p>Answers given</p><strong id="answersCount">0</strong></article>
+        <article class="card profile-stat-card"><p>Upvotes received</p><strong id="upvotesCount">0</strong></article>
+    </section>
+
+    <section class="card profile-activity-card">
+        <h2>Recent Activity</h2>
+        <ul id="activityList" class="profile-activity-list">
+            <li>No activity yet.</li>
+        </ul>
+    </section>
+</main>
+
+<script src="script.js"></script>
+<script type="module" src="profile.js"></script>
+</body>
+</html>

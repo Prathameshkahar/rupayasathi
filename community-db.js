@@ -11,7 +11,8 @@ import {
     serverTimestamp,
     where,
     getDoc,
-    runTransaction
+    runTransaction,
+    limit
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { db } from "./firebase-config.js";
 
@@ -103,3 +104,22 @@ export const upvoteComment = async ({ commentId, ownerId }) => {
 export const watchUserProfile = (uid, callback, onError) => onSnapshot(doc(db, "users", uid), (snap) => {
     callback(snap.exists() ? snap.data() : null);
 }, onError);
+
+export const getUserProfile = async (uid) => {
+    const snap = await getDoc(doc(db, "users", uid));
+    return snap.exists() ? snap.data() : null;
+};
+
+export const watchUserPosts = (uid, callback, onError) => {
+    const q = query(postsRef, where("userId", "==", uid), orderBy("timestamp", "desc"), limit(5));
+    return onSnapshot(q, (snapshot) => {
+        callback(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })));
+    }, onError);
+};
+
+export const watchUserAnswers = (uid, callback, onError) => {
+    const q = query(commentsRef, where("userId", "==", uid), orderBy("timestamp", "desc"), limit(5));
+    return onSnapshot(q, (snapshot) => {
+        callback(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })));
+    }, onError);
+};

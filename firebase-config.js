@@ -12,6 +12,8 @@ const firebaseConfig = {
     appId: "..."
 };
 
+export const isFirebaseConfigured = Object.values(firebaseConfig).every((value) => value && value !== "...");
+
 const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
