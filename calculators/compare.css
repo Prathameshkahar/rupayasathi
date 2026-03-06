@@ -1,0 +1,70 @@
+.compare-page {
+    display: grid;
+    gap: 1rem;
+}
+
+.compare-breadcrumb {
+    text-decoration: none;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.compare-selectors {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.compare-selectors select,
+.compare-page input {
+    width: 100%;
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.compare-results {
+    display: grid;
+    gap: 1rem;
+}
+
+.compare-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.compare-panel-grid {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.compare-panel-grid h2 {
+    margin-bottom: 0.3rem;
+}
+
+.compare-metrics {
+    list-style: none;
+    display: grid;
+    gap: 0.4rem;
+}
+
+.compare-metrics li {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--result-bg);
+    padding: 0.6rem 0.75rem;
+}
+
+.compare-chart-card {
+    min-height: 320px;
+}
+
+@media (max-width: 860px) {
+    .compare-selectors,
+    .compare-columns {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,29 +1,36 @@
 import { signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { auth } from "./firebase-config.js";
 
-const prefixes = ["Paisa", "Lakshmi", "Desi", "Budget", "Saving", "Smart"];
+const prefixes = ["Paisa", "Lakshmi", "Desi", "Smart", "Budget", "Saving"];
 const suffixes = ["Investor", "Trader", "Guru", "Planner", "Ninja", "Builder"];
 
 const randomFrom = (list) => list[Math.floor(Math.random() * list.length)];
 
-const generateIdentity = () => {
-    const username = `${randomFrom(prefixes)}${randomFrom(suffixes)}`;
-    return {
+const generateUsername = () => `${randomFrom(prefixes)}${randomFrom(suffixes)}`;
+
+const generateAvatar = (username) => `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(username)}&radius=50&backgroundType=gradientLinear`;
+
+const ensureLocalIdentity = () => {
+    const storedProfile = JSON.parse(localStorage.getItem("communityUserProfile") || "null");
+    const storedUsername = localStorage.getItem("communityUsername");
+    const username = storedUsername || storedProfile?.username || generateUsername();
+
+    if (!storedUsername) {
+        localStorage.setItem("communityUsername", username);
+    }
+
+    const normalizedProfile = {
         username,
-        avatar: `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(username)}&radius=50&backgroundType=gradientLinear`
+        avatar: storedProfile?.avatar || generateAvatar(username),
+        joinDate: storedProfile?.joinDate || new Date().toISOString()
     };
+
+    localStorage.setItem("communityUserProfile", JSON.stringify(normalizedProfile));
+    return normalizedProfile;
 };
 
 export const getCommunityIdentity = async () => {
-    let stored = JSON.parse(localStorage.getItem("communityUserProfile") || "null");
-    if (!stored?.username || !stored?.avatar || !stored?.joinDate) {
-        const identity = generateIdentity();
-        stored = {
-            ...identity,
-            joinDate: new Date().toISOString()
-        };
-        localStorage.setItem("communityUserProfile", JSON.stringify(stored));
-    }
+    const stored = ensureLocalIdentity();
 
     try {
         await signInAnonymously(auth);

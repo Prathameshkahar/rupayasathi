@@ -59,6 +59,19 @@ body.dark-mode {
 .profile-username { margin: 0; }
 .profile-join-date { color: var(--muted); }
 
+.profile-card {
+    background: color-mix(in srgb, var(--card-bg) 88%, var(--surface-alt));
+}
+
+.profile-card p {
+    color: var(--muted);
+    margin-top: 0.45rem;
+}
+
+.profile-card strong {
+    color: var(--text-color);
+}
+
 .profile-stats-grid { display: grid; gap: 1rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .profile-stat-card { text-align: center; background: var(--card-bg); }
 .profile-stat-card p { color: var(--muted); }
