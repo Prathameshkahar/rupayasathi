@@ -5,6 +5,9 @@ const profileNavAvatar = document.getElementById("profileNavAvatar");
 const profileAvatar = document.getElementById("profileAvatar");
 const profileUsername = document.getElementById("profileUsername");
 const profileJoinDate = document.getElementById("profileJoinDate");
+const profileCardUsername = document.getElementById("profileCardUsername");
+const profileCardJoinDate = document.getElementById("profileCardJoinDate");
+const activityHeading = document.getElementById("activityHeading");
 const postsCount = document.getElementById("postsCount");
 const answersCount = document.getElementById("answersCount");
 const upvotesCount = document.getElementById("upvotesCount");
@@ -28,6 +31,20 @@ const formatTimestamp = (ts) => {
     return ts.toDate().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
 };
 
+const getFallbackProfile = () => {
+    const storedProfile = JSON.parse(localStorage.getItem("communityUserProfile") || "null");
+    const storedUsername = localStorage.getItem("communityUsername");
+    return {
+        userId: viewer?.uid || "local-user",
+        username: storedUsername || storedProfile?.username || viewer?.username || "CommunityMember",
+        avatar: storedProfile?.avatar || viewer?.avatar || "https://api.dicebear.com/9.x/initials/svg?seed=CommunityMember&radius=50&backgroundType=gradientLinear",
+        joinDate: storedProfile?.joinDate || viewer?.joinDate || new Date().toISOString(),
+        postsCount: 0,
+        answersCount: 0,
+        upvotesReceived: 0
+    };
+};
+
 const renderProfile = () => {
     if (!profile) return;
 
@@ -35,6 +52,9 @@ const renderProfile = () => {
     profileNavAvatar.src = profile.avatar;
     profileUsername.textContent = profile.username;
     profileJoinDate.textContent = formatDate(profile.joinDate);
+    profileCardUsername.textContent = profile.username;
+    profileCardJoinDate.textContent = formatDate(profile.joinDate).replace("Joined ", "");
+    activityHeading.textContent = `${profile.username}'s Recent Activity`;
     postsCount.textContent = profile.postsCount || 0;
     answersCount.textContent = profile.answersCount || 0;
     upvotesCount.textContent = profile.upvotesReceived || 0;
@@ -66,7 +86,7 @@ const renderActivity = () => {
 
     activityList.innerHTML = items.length
         ? items.map((item) => `<li><strong>${item.type.toUpperCase()}</strong> · ${item.title}<br><small>${formatTimestamp(item.time)}</small></li>`).join("")
-        : "<li>No activity yet.</li>";
+        : `<li>${profile?.username || "User"} has no activity yet.</li>`;
 };
 
 const init = async () => {
@@ -79,14 +99,10 @@ const init = async () => {
         profile = null;
     }
 
-    profile = profile || {
-        userId: viewer.uid,
-        username: viewer.username,
-        avatar: viewer.avatar,
-        joinDate: viewer.joinDate,
-        postsCount: 0,
-        answersCount: 0,
-        upvotesReceived: 0
+    profile = {
+        ...getFallbackProfile(),
+        ...profile,
+        username: localStorage.getItem("communityUsername") || profile?.username || viewer.username
     };
 
     renderProfile();

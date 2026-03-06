@@ -37,6 +37,12 @@
         </div>
     </section>
 
+    <section class="card profile-card" aria-live="polite">
+        <h2>Profile Card</h2>
+        <p><strong>Username:</strong> <span id="profileCardUsername">Loading...</span></p>
+        <p><strong>Member Since:</strong> <span id="profileCardJoinDate">Loading...</span></p>
+    </section>
+
     <section class="profile-stats-grid">
         <article class="card profile-stat-card"><p>Posts created</p><strong id="postsCount">0</strong></article>
         <article class="card profile-stat-card"><p>Answers given</p><strong id="answersCount">0</strong></article>
@@ -44,9 +50,9 @@
     </section>
 
     <section class="card profile-activity-card">
-        <h2>Recent Activity</h2>
+        <h2 id="activityHeading">Recent Activity</h2>
         <ul id="activityList" class="profile-activity-list">
-            <li>No activity yet.</li>
+            <li>Loading profile activity...</li>
         </ul>
     </section>
 </main>
