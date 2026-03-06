@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rupaya Saathi | Community</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="community.css">
+</head>
+<body>
+<header class="site-header">
+    <nav class="navbar container">
+        <a class="logo" href="index.html">Rupaya Saathi</a>
+        <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="calculators.html">Calculators</a></li>
+            <li><a class="active" href="community.html">Community</a></li>
+            <li><a href="blogs.html">Blogs</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="community-main">
+    <section class="community-hero container card">
+        <div class="word-cloud" aria-hidden="true">
+            <span>Paisa</span><span>Rupai</span><span>Lakshmi</span><span>Savings</span><span>Budget</span>
+            <span>Nivesh</span><span>Dhan</span><span>Growth</span><span>Future</span><span>Finance</span>
+        </div>
+        <h1>Ask the Rupaya Saathi Community</h1>
+        <p>Discuss money, investments, savings and financial decisions with fellow Indians.</p>
+        <p class="tagline">From SIP to taxes, ask anything about paisa.</p>
+        <div class="community-meta">
+            <span id="usernameChip" class="meta-chip"></span>
+            <span id="questionCounter" class="meta-chip">0 live questions</span>
+        </div>
+    </section>
+
+    <section class="container community-layout">
+        <div>
+            <section class="card ask-card">
+                <h2>Ask in Live Community Bar</h2>
+                <form id="questionForm" class="live-question-form" novalidate>
+                    <div class="live-bar-label">
+                        <span class="live-dot"></span>
+                        <span>Live Ask Stream</span>
+                    </div>
+                    <div class="live-bar-row">
+                        <input id="questionTitle" name="questionTitle" type="text" maxlength="120" placeholder="Ask your question title" required>
+                        <input id="questionDescription" name="questionDescription" type="text" maxlength="600" placeholder="Add details (e.g., SIP, tax, loan, budget)" required>
+                        <button type="submit" class="btn btn-primary">Post</button>
+                    </div>
+
+                    <label for="questionTags">Question Tags</label>
+                    <div class="tag-options" id="questionTags">
+                        <label><input type="checkbox" value="Tax">Tax</label>
+                        <label><input type="checkbox" value="SIP">SIP</label>
+                        <label><input type="checkbox" value="Mutual Funds">Mutual Funds</label>
+                        <label><input type="checkbox" value="Loans">Loans</label>
+                        <label><input type="checkbox" value="Budget">Budget</label>
+                        <label><input type="checkbox" value="Stock Market">Stock Market</label>
+                    </div>
+
+                    <p id="questionFeedback" class="community-feedback" aria-live="polite"></p>
+                </form>
+            </section>
+
+            <section class="card live-ticker-card" aria-label="Live community updates">
+                <div class="ticker-title">Live Discussion Bar</div>
+                <div class="ticker-track-wrap">
+                    <div id="liveTickerTrack" class="ticker-track">
+                        <span>Loading latest community questions...</span>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="section-title">Latest Questions</h2>
+                <div id="questionsList" class="question-list" aria-live="polite"></div>
+            </section>
+        </div>
+
+        <aside class="card trending-card">
+            <h2>Trending Questions</h2>
+            <div id="trendingList" class="trending-list"></div>
+        </aside>
+    </section>
+</main>
+
+<script src="script.js"></script>
+<script type="module" src="community.js"></script>
+</body>
+</html>
