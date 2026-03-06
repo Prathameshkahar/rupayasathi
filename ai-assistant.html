@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rupaya Saathi | AI Finance Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="ai-assistant.css">
+</head>
+<body>
+<header class="site-header">
+    <nav class="navbar container">
+        <a class="logo" href="index.html">Rupaya Saathi</a>
+        <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="calculators.html">Calculators</a></li>
+            <li><a class="active" href="ai-assistant.html">AI Assistant</a></li>
+            <li><a href="blogs.html">Blogs</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="page-main">
+    <section class="container assistant-page">
+        <h1>AI Finance Assistant</h1>
+        <p class="section-intro">Ask questions about savings, investing, SIP, taxes, loans, and financial planning.</p>
+
+        <section class="card assistant-chat-card">
+            <div id="chatMessages" class="chat-messages" aria-live="polite"></div>
+            <form id="assistantForm" class="assistant-form">
+                <label class="sr-only" for="assistantQuestion">Ask your finance question</label>
+                <input id="assistantQuestion" type="text" placeholder="Ask a finance question..." required>
+                <button type="submit" class="btn btn-primary">Ask</button>
+            </form>
+            <p class="assistant-disclaimer">AI-generated answers are for informational purposes only.</p>
+        </section>
+    </section>
+</main>
+
+<script src="script.js"></script>
+<script src="ai-assistant.js"></script>
+</body>
+</html>

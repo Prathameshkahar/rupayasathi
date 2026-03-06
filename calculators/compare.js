@@ -1,14 +1,14 @@
 (function () {
     const inr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 });
-    const percent = (n) => `${n.toFixed(2)}%`;
+    const percent = (n) => `${Number(n || 0).toFixed(2)}%`;
 
     const calculatorConfigs = {
         sip: {
             name: "SIP Calculator",
             fields: [
-                { key: "monthly", label: "Monthly Investment (₹)", min: 500, step: 100, value: 5000 },
-                { key: "rate", label: "Annual Return (%)", min: 0, step: 0.1, value: 12 },
-                { key: "years", label: "Duration (Years)", min: 1, step: 1, value: 10 }
+                { key: "monthly", label: "Investment Amount", min: 500, step: 100, value: 5000, placeholder: "Enter amount" },
+                { key: "years", label: "Tenure (Years)", min: 1, step: 1, value: 10, placeholder: "Enter years" },
+                { key: "rate", label: "Interest Rate (%)", min: 0, step: 0.1, value: 12, placeholder: "Enter rate" }
             ],
             calculate: ({ monthly, rate, years }) => {
                 const mRate = rate / 1200;
@@ -21,21 +21,34 @@
         fd: {
             name: "FD Calculator",
             fields: [
-                { key: "principal", label: "Deposit Amount (₹)", min: 1000, step: 500, value: 200000 },
-                { key: "rate", label: "Annual Interest (%)", min: 0, step: 0.1, value: 7 },
-                { key: "years", label: "Duration (Years)", min: 1, step: 1, value: 5 }
+                { key: "principal", label: "Investment Amount", min: 1000, step: 500, value: 200000, placeholder: "Enter amount" },
+                { key: "years", label: "Tenure (Years)", min: 1, step: 1, value: 5, placeholder: "Enter years" },
+                { key: "rate", label: "Interest Rate (%)", min: 0, step: 0.1, value: 7, placeholder: "Enter rate" }
             ],
             calculate: ({ principal, rate, years }) => {
                 const finalValue = principal * Math.pow(1 + rate / 100, years);
                 return { investment: principal, interest: finalValue - principal, finalValue, details: `Compounded yearly at ${percent(rate)}` };
             }
         },
+        ppf: {
+            name: "PPF Calculator",
+            fields: [
+                { key: "annual", label: "Investment Amount", min: 500, step: 500, value: 50000, placeholder: "Enter amount" },
+                { key: "years", label: "Tenure (Years)", min: 1, step: 1, value: 15, placeholder: "Enter years" },
+                { key: "rate", label: "Interest Rate (%)", min: 0, step: 0.1, value: 7.1, placeholder: "Enter rate" }
+            ],
+            calculate: ({ annual, rate, years }) => {
+                let finalValue = 0;
+                for (let year = 1; year <= years; year += 1) finalValue = (finalValue + annual) * (1 + rate / 100);
+                return { investment: annual * years, interest: finalValue - annual * years, finalValue, details: "Annual contribution model" };
+            }
+        },
         rd: {
             name: "RD Calculator",
             fields: [
-                { key: "monthly", label: "Monthly Deposit (₹)", min: 500, step: 100, value: 3000 },
-                { key: "rate", label: "Annual Interest (%)", min: 0, step: 0.1, value: 7 },
-                { key: "years", label: "Duration (Years)", min: 1, step: 1, value: 5 }
+                { key: "monthly", label: "Investment Amount", min: 500, step: 100, value: 3000, placeholder: "Enter amount" },
+                { key: "years", label: "Tenure (Years)", min: 1, step: 1, value: 5, placeholder: "Enter years" },
+                { key: "rate", label: "Interest Rate (%)", min: 0, step: 0.1, value: 7, placeholder: "Enter rate" }
             ],
             calculate: ({ monthly, rate, years }) => {
                 const months = years * 12;
@@ -44,100 +57,10 @@
                 const investment = monthly * months;
                 return { investment, interest: finalValue - investment, finalValue, details: `Approximation at ${percent(rate)}` };
             }
-        },
-        emi: {
-            name: "EMI Calculator",
-            fields: [
-                { key: "loan", label: "Loan Amount (₹)", min: 10000, step: 1000, value: 500000 },
-                { key: "rate", label: "Annual Interest (%)", min: 0, step: 0.1, value: 10 },
-                { key: "years", label: "Tenure (Years)", min: 1, step: 1, value: 5 }
-            ],
-            calculate: ({ loan, rate, years }) => {
-                const n = years * 12;
-                const r = rate / 1200;
-                const emi = r ? loan * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1) : loan / n;
-                const finalValue = emi * n;
-                return { investment: loan, interest: finalValue - loan, finalValue, details: `EMI: ${inr.format(emi)} per month` };
-            }
-        },
-        "mutual-returns": {
-            name: "Mutual Fund Returns Calculator",
-            fields: [
-                { key: "invested", label: "Total Invested (₹)", min: 1000, step: 500, value: 150000 },
-                { key: "current", label: "Current Value (₹)", min: 1000, step: 500, value: 220000 },
-                { key: "years", label: "Duration (Years)", min: 1, step: 1, value: 7 }
-            ],
-            calculate: ({ invested, current, years }) => {
-                const cagr = (Math.pow(current / invested, 1 / years) - 1) * 100;
-                return { investment: invested, interest: current - invested, finalValue: current, details: `CAGR: ${percent(cagr)}` };
-            }
-        },
-        ppf: {
-            name: "PPF Calculator",
-            fields: [
-                { key: "annual", label: "Annual Contribution (₹)", min: 500, step: 500, value: 50000 },
-                { key: "rate", label: "Interest Rate (%)", min: 0, step: 0.1, value: 7.1 },
-                { key: "years", label: "Duration (Years)", min: 1, step: 1, value: 15 }
-            ],
-            calculate: ({ annual, rate, years }) => {
-                let finalValue = 0;
-                for (let year = 1; year <= years; year += 1) finalValue = (finalValue + annual) * (1 + rate / 100);
-                return { investment: annual * years, interest: finalValue - annual * years, finalValue, details: `Annual contribution model` };
-            }
-        },
-        epf: {
-            name: "EPF Calculator",
-            fields: [
-                { key: "salary", label: "Monthly Salary (₹)", min: 5000, step: 500, value: 50000 },
-                { key: "contribution", label: "Total Contribution (%)", min: 1, step: 0.1, value: 15.67 },
-                { key: "rate", label: "Interest Rate (%)", min: 0, step: 0.1, value: 8.15 },
-                { key: "years", label: "Duration (Years)", min: 1, step: 1, value: 10 }
-            ],
-            calculate: ({ salary, contribution, rate, years }) => {
-                const monthly = salary * (contribution / 100);
-                const months = years * 12;
-                const mRate = rate / 1200;
-                const finalValue = mRate ? monthly * ((Math.pow(1 + mRate, months) - 1) / mRate) * (1 + mRate) : monthly * months;
-                const investment = monthly * months;
-                return { investment, interest: finalValue - investment, finalValue, details: `Monthly contribution: ${inr.format(monthly)}` };
-            }
-        },
-        "income-tax": {
-            name: "Income Tax Calculator",
-            fields: [
-                { key: "income", label: "Annual Taxable Income (₹)", min: 0, step: 1000, value: 1200000 }
-            ],
-            calculate: ({ income }) => {
-                const slabs = [[400000, 0], [800000, 0.05], [1200000, 0.1], [1600000, 0.15], [2000000, 0.2], [2400000, 0.25], [Infinity, 0.3]];
-                let previous = 0;
-                let tax = 0;
-                slabs.forEach(([limit, slabRate]) => {
-                    if (income > previous) {
-                        const taxable = Math.min(income, limit) - previous;
-                        tax += taxable * slabRate;
-                        previous = limit;
-                    }
-                });
-                if (income <= 1200000) tax = 0;
-                const cess = tax * 0.04;
-                const finalValue = tax + cess;
-                return { investment: income, interest: finalValue, finalValue, details: "Tax + cess estimate" };
-            }
-        },
-        gst: {
-            name: "GST Calculator",
-            fields: [
-                { key: "amount", label: "Base Amount (₹)", min: 1, step: 100, value: 50000 },
-                { key: "rate", label: "GST Rate (%)", min: 0, step: 0.1, value: 18 }
-            ],
-            calculate: ({ amount, rate }) => {
-                const gstValue = amount * rate / 100;
-                return { investment: amount, interest: gstValue, finalValue: amount + gstValue, details: `GST amount at ${percent(rate)}` };
-            }
         }
     };
 
-    const supportedOrder = ["sip", "fd", "rd", "emi", "mutual-returns", "ppf", "epf", "income-tax", "gst"];
+    const supportedOrder = ["sip", "fd", "ppf", "rd"];
     const calculatorASelect = document.getElementById("calculatorASelect");
     const calculatorBSelect = document.getElementById("calculatorBSelect");
     const panelA = document.getElementById("panelA");
@@ -146,42 +69,48 @@
     const chartCanvas = document.getElementById("comparisonChart");
     let chart;
 
-    function toInput(field, value, side) {
-        return `<label>${field.label}<input type="number" min="${field.min}" step="${field.step}" value="${value}" data-side="${side}" data-key="${field.key}"></label>`;
-    }
+    const state = { a: {}, b: {} };
 
     function populateSelect(select, defaultValue) {
         select.innerHTML = `<option value="">Choose a calculator</option>${supportedOrder.map((slug) => `<option value="${slug}">${calculatorConfigs[slug].name}</option>`).join("")}`;
         select.value = defaultValue;
     }
 
-    function readInputs(panel, config) {
-        return config.fields.reduce((acc, field) => {
-            const input = panel.querySelector(`[data-key='${field.key}']`);
-            acc[field.key] = Number(input?.value || field.value || 0);
-            return acc;
-        }, {});
-    }
-
-    function renderPanel(side, selectValue, panel) {
-        const config = calculatorConfigs[selectValue];
+    function renderPanel(side, slug, panel) {
+        const config = calculatorConfigs[slug];
         if (!config) {
             panel.innerHTML = "";
-            return null;
+            return;
         }
+
+        state[side] = state[side][slug] || Object.fromEntries(config.fields.map((field) => [field.key, field.value]));
 
         panel.innerHTML = `
             <div class="compare-panel-grid">
                 <h2>${config.name}</h2>
-                ${config.fields.map((field) => toInput(field, field.value, side)).join("")}
+                ${config.fields.map((field) => `
+                    <label>${field.label}
+                        <input type="number" min="${field.min}" step="${field.step}" value="${state[side][slug][field.key]}" placeholder="${field.placeholder}" data-side="${side}" data-slug="${slug}" data-key="${field.key}">
+                    </label>`).join("")}
                 <ul class="compare-metrics" data-metrics="${side}"></ul>
             </div>
         `;
+    }
 
-        const result = config.calculate(readInputs(panel, config));
+    function calculatePanel(side, slug, panel) {
+        const config = calculatorConfigs[slug];
+        if (!config) return null;
+
+        const values = {};
+        config.fields.forEach((field) => {
+            const input = panel.querySelector(`[data-key='${field.key}']`);
+            values[field.key] = Number(input?.value || 0);
+        });
+
+        const result = config.calculate(values);
         const metrics = panel.querySelector(".compare-metrics");
         metrics.innerHTML = `
-            <li><strong>Inputs used:</strong> ${config.fields.map((field) => `${field.label.split("(")[0].trim()}: ${readInputs(panel, config)[field.key]}`).join(" | ")}</li>
+            <li><strong>Inputs used:</strong> ${config.fields.map((field) => `${field.label}: ${values[field.key]}`).join(" | ")}</li>
             <li><strong>Estimated returns:</strong> ${inr.format(result.interest)}</li>
             <li><strong>Interest gained:</strong> ${inr.format(result.interest)}</li>
             <li><strong>Final maturity value:</strong> ${inr.format(result.finalValue)}</li>
@@ -223,33 +152,46 @@
         });
     }
 
-    function refresh() {
-        const selectedA = calculatorASelect.value;
-        const selectedB = calculatorBSelect.value;
-        if (!selectedA || !selectedB) {
+    function calculateResults() {
+        const slugA = calculatorASelect.value;
+        const slugB = calculatorBSelect.value;
+        if (!slugA || !slugB) {
             comparisonResults.hidden = true;
             return;
         }
 
         comparisonResults.hidden = false;
-        const resultA = renderPanel("a", selectedA, panelA);
-        const resultB = renderPanel("b", selectedB, panelB);
+        const resultA = calculatePanel("a", slugA, panelA);
+        const resultB = calculatePanel("b", slugB, panelB);
         renderChart(resultA, resultB);
+    }
 
+    function refreshSelectors() {
+        const slugA = calculatorASelect.value;
+        const slugB = calculatorBSelect.value;
+        if (!slugA || !slugB) {
+            comparisonResults.hidden = true;
+            return;
+        }
+
+        renderPanel("a", slugA, panelA);
+        renderPanel("b", slugB, panelB);
+        calculateResults();
     }
 
     comparisonResults.addEventListener("input", (event) => {
         if (!(event.target instanceof HTMLInputElement)) return;
-        const updatedA = renderPanel("a", calculatorASelect.value, panelA);
-        const updatedB = renderPanel("b", calculatorBSelect.value, panelB);
-        renderChart(updatedA, updatedB);
+        const { side, slug, key } = event.target.dataset;
+        if (!side || !slug || !key) return;
+        state[side][slug][key] = Number(event.target.value || 0);
+        calculateResults();
     });
 
     populateSelect(calculatorASelect, "sip");
     populateSelect(calculatorBSelect, "fd");
 
-    calculatorASelect.addEventListener("change", refresh);
-    calculatorBSelect.addEventListener("change", refresh);
+    calculatorASelect.addEventListener("change", refreshSelectors);
+    calculatorBSelect.addEventListener("change", refreshSelectors);
 
-    refresh();
+    refreshSelectors();
 })();
