@@ -4,6 +4,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const navLinks = document.querySelector(".nav-links");
     const savedTheme = localStorage.getItem("theme");
 
+    const normalizeNavbar = () => {
+        const navList = document.querySelector(".navbar .nav-links");
+        if (!navList) {
+            return;
+        }
+
+        const path = window.location.pathname;
+        const inNestedDirectory = path.includes("/blogs/") || path.includes("/calculators/");
+        const base = inNestedDirectory ? "../" : "";
+        const links = [
+            { label: "Home", href: `${base}index.html` },
+            { label: "Calculators", href: `${base}calculators.html` },
+            { label: "Community", href: `${base}community.html` },
+            { label: "Blogs", href: `${base}blogs.html` },
+            { label: "Contact", href: `${base}contact.html` }
+        ];
+
+        const currentPath = path.split("/").pop();
+        navList.innerHTML = links.map(({ label, href }) => {
+            const isActive = href.endsWith(currentPath || "index.html");
+            return `<li><a class="${isActive ? "active" : ""}" href="${href}">${label}</a></li>`;
+        }).join("");
+    };
+
+    normalizeNavbar();
+
     // Floating theme toggle (shown on all pages).
     const themeToggle = document.createElement("button");
     themeToggle.type = "button";
