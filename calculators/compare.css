@@ -58,13 +58,39 @@
     padding: 0.6rem 0.75rem;
 }
 
+
 .compare-chart-card {
-    min-height: 320px;
+    overflow: hidden;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    height: 400px;
+    margin: 0 auto;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 400px;
 }
 
 @media (max-width: 860px) {
     .compare-selectors,
     .compare-columns {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .chart-container {
+        height: 320px;
+        max-height: 70vh;
+    }
+
+    .chart-container canvas {
+        max-height: 320px;
     }
 }

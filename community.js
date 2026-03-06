@@ -6,7 +6,9 @@ import {
     upvotePost,
     upvoteComment,
     upsertUserProfile,
-    watchUserProfile
+    watchUserProfile,
+    watchAiAnswerByPost,
+    generateAndStoreAiAnswer
 } from "./community-db.js";
 import { getCommunityIdentity } from "./community-auth.js";
 
@@ -26,6 +28,7 @@ const profileIconImage = document.getElementById("profileIconImage");
 let viewer = null;
 let postsCache = [];
 let activeCommentUnsub = null;
+let activeAiAnswerUnsub = null;
 
 const votedPostKey = "communityVotedPosts";
 const votedCommentKey = "communityVotedComments";
@@ -90,6 +93,10 @@ const openThread = (postId) => {
         activeCommentUnsub();
         activeCommentUnsub = null;
     }
+    if (activeAiAnswerUnsub) {
+        activeAiAnswerUnsub();
+        activeAiAnswerUnsub = null;
+    }
 
     const url = new URL(window.location.href);
     url.searchParams.set("post", postId);
@@ -99,8 +106,19 @@ const openThread = (postId) => {
     threadView.innerHTML = `
         <div class="community-post-actions"><button class="community-action-btn" data-action="close-thread">← Back to feed</button></div>
         <h2>Discussion Thread</h2>
-        ${postCardMarkup(post)}
-        <div id="commentList" class="community-comment-list"><p>Loading answers...</p></div>
+        <section class="community-thread-question">
+            <h3>Question</h3>
+            ${postCardMarkup(post)}
+        </section>
+        <section class="community-ai-answer" id="aiAnswerSection">
+            <h3>🤖 AI Suggested Answer <span class="community-ai-label">AI Generated Answer</span></h3>
+            <p id="aiAnswerText">Generating AI response...</p>
+            <p class="community-ai-disclaimer">AI responses are informational and should not replace professional financial advice.</p>
+        </section>
+        <section class="community-thread-community">
+            <h3>💬 Community Answers</h3>
+            <div id="commentList" class="community-comment-list"><p>Loading answers...</p></div>
+        </section>
         <form id="commentForm" class="community-comment-form">
             <input id="commentText" type="text" maxlength="400" placeholder="Write your answer" required>
             <button class="btn btn-primary community-animated-btn" type="submit">Add Answer</button>
@@ -109,6 +127,13 @@ const openThread = (postId) => {
     const commentList = document.getElementById("commentList");
     const commentForm = document.getElementById("commentForm");
     const commentText = document.getElementById("commentText");
+    const aiAnswerText = document.getElementById("aiAnswerText");
+
+    activeAiAnswerUnsub = watchAiAnswerByPost(postId, (answer) => {
+        aiAnswerText.textContent = answer?.answerText || "AI is preparing a suggestion for this question.";
+    }, () => {
+        aiAnswerText.textContent = "AI answer unavailable. Please check configuration and try again.";
+    });
 
     activeCommentUnsub = watchCommentsByPost(postId, (comments) => {
         const roots = comments.filter((item) => !item.parentCommentId);
@@ -167,7 +192,10 @@ postForm.addEventListener("submit", async (event) => {
     }
 
     try {
-        await createPost({ userId: viewer.uid, username: viewer.username, avatar: viewer.avatar, title, content });
+        const postRef = await createPost({ userId: viewer.uid, username: viewer.username, avatar: viewer.avatar, title, content });
+        generateAndStoreAiAnswer({ postId: postRef.id, questionTitle: title, questionContent: content }).catch((error) => {
+            console.warn("Unable to generate AI answer.", error);
+        });
         postTitle.value = "";
         postContent.value = "";
         postMessage.textContent = "Posted successfully ✓";
@@ -215,6 +243,14 @@ threadView.addEventListener("click", async (event) => {
 
     if (target.dataset.action === "close-thread") {
         threadView.hidden = true;
+        if (activeCommentUnsub) {
+            activeCommentUnsub();
+            activeCommentUnsub = null;
+        }
+        if (activeAiAnswerUnsub) {
+            activeAiAnswerUnsub();
+            activeAiAnswerUnsub = null;
+        }
         const url = new URL(window.location.href);
         url.searchParams.delete("post");
         window.history.replaceState({}, "", url);

@@ -130,6 +130,37 @@ body.dark-mode {
 .community-reply-list { margin-top: 0.55rem; padding-left: 0.8rem; display: grid; gap: 0.4rem; border-left: 2px solid var(--border); }
 .community-reply-item { font-size: 0.88rem; color: var(--muted); }
 
+
+.community-thread-question,
+.community-thread-community,
+.community-ai-answer {
+    margin-top: 0.75rem;
+    padding: 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--card-bg) 88%, var(--surface-alt));
+}
+
+.community-ai-answer {
+    border-color: color-mix(in srgb, var(--primary-color) 35%, var(--border));
+}
+
+.community-ai-label {
+    display: inline-block;
+    font-size: 0.72rem;
+    margin-left: 0.4rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--primary-color);
+}
+
+.community-ai-disclaimer {
+    margin-top: 0.6rem;
+    font-size: 0.79rem;
+    color: var(--muted);
+}
+
 @media (max-width: 980px) {
     .community-main { grid-template-columns: 1fr; }
     .community-sidebar { position: static; }
