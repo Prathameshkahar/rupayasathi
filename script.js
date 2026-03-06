@@ -39,6 +39,28 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+
+    const homeCommunityQuestion = document.getElementById("homeCommunityQuestion");
+    if (homeCommunityQuestion) {
+        const redirectToCommunity = () => {
+            const queryText = homeCommunityQuestion.value.trim();
+            const params = new URLSearchParams({ focus: "ask" });
+            if (queryText) {
+                params.set("q", queryText);
+            }
+            window.location.href = `community.html?${params.toString()}`;
+        };
+
+        homeCommunityQuestion.addEventListener("focus", redirectToCommunity);
+        homeCommunityQuestion.addEventListener("click", redirectToCommunity);
+        homeCommunityQuestion.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                redirectToCommunity();
+            }
+        });
+    }
+
     const contactForm = document.getElementById("contactForm");
     if (!contactForm) {
         return;

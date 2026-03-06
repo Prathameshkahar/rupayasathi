@@ -36,6 +36,9 @@ const questionFeedback = document.getElementById("questionFeedback");
 const questionsList = document.getElementById("questionsList");
 const trendingList = document.getElementById("trendingList");
 const liveTickerTrack = document.getElementById("liveTickerTrack");
+const heroQuestionInput = document.getElementById("heroQuestionInput");
+const titleInput = document.getElementById("questionTitle");
+
 
 const answersCache = new Map();
 let currentUsername = localStorage.getItem("username");
@@ -65,6 +68,39 @@ const formatTime = (timestamp) => {
         timeStyle: "short"
     });
 };
+
+
+const focusAskInput = () => {
+    if (!titleInput) {
+        return;
+    }
+    titleInput.focus();
+    titleInput.scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
+if (heroQuestionInput) {
+    heroQuestionInput.addEventListener("focus", focusAskInput);
+    heroQuestionInput.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") {
+            return;
+        }
+        event.preventDefault();
+        const value = heroQuestionInput.value.trim();
+        if (value && !titleInput.value.trim()) {
+            titleInput.value = value;
+        }
+        focusAskInput();
+    });
+}
+
+const params = new URLSearchParams(window.location.search);
+if (params.get("focus") === "ask") {
+    const quickQuestion = params.get("q");
+    if (quickQuestion && titleInput && !titleInput.value.trim()) {
+        titleInput.value = quickQuestion.slice(0, 120);
+    }
+    requestAnimationFrame(focusAskInput);
+}
 
 const selectedTags = () => Array.from(document.querySelectorAll("#questionTags input:checked")).map((item) => item.value);
 
