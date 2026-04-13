@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const links = [
             { label: "Home", href: `${base}index.html` },
             { label: "Calculators", href: `${base}calculators.html` },
-            { label: "AI Help", href: `${base}ai-assistance.html` },
             { label: "Blogs", href: `${base}blogs.html` },
             { label: "Contact", href: `${base}contact.html` }
         ];
