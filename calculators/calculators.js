@@ -36,6 +36,78 @@
     return Number(value).toLocaleString("en-IN", { maximumFractionDigits: 2 });
   }
 
+  function findRowValue(rows, matcher) {
+    const row = rows.find(([label]) => matcher(label.toLowerCase()));
+    return row ? row[1] : 0;
+  }
+
+  function getResultConfig(slug) {
+    const defaultConfig = {
+      labels: {
+        invested: "Total Investment",
+        interest: "Total Interest Earned",
+        finalValue: "Final Value"
+      },
+      compute: (summary) => summary
+    };
+
+    const customBySlug = {
+      sip: {
+        labels: { invested: "Invested Amount", interest: "Estimated Returns", finalValue: "Total Value" },
+        compute: (summary) => summary
+      },
+      "stepup-sip": {
+        labels: { invested: "Invested Amount", interest: "Estimated Returns", finalValue: "Total Value" },
+        compute: (summary) => summary
+      },
+      fd: {
+        labels: { invested: "Principal Amount", interest: "Interest Earned", finalValue: "Maturity Value" },
+        compute: (summary) => summary
+      },
+      rd: {
+        labels: { invested: "Total Investment", interest: "Interest Earned", finalValue: "Maturity Value" },
+        compute: (summary) => summary
+      },
+      ppf: {
+        labels: { invested: "Total Investment", interest: "Interest Earned", finalValue: "Maturity Value" },
+        compute: (summary) => summary
+      },
+      epf: {
+        labels: { invested: "Total Investment", interest: "Interest Earned", finalValue: "Maturity Value" },
+        compute: (summary) => summary
+      },
+      "mutual-returns": {
+        labels: { invested: "Invested Amount", interest: "Returns", finalValue: "Total Value" },
+        compute: (summary) => summary
+      },
+      "income-tax": {
+        labels: { invested: "Total Income", interest: "Tax Payable", finalValue: "Net Income After Tax" },
+        compute: (summary, values, rows) => {
+          const taxPayable = findRowValue(rows, (label) => label.includes("total tax liability"));
+          return {
+            invested: Math.max(values.income || 0, 0),
+            interest: Math.max(taxPayable, 0),
+            finalValue: Math.max((values.income || 0) - taxPayable, 0)
+          };
+        }
+      }
+    };
+
+    const isEmiSlug = ["emi", "home-loan-emi", "car-loan-emi", "personal-emi"].includes(slug);
+    if (isEmiSlug) {
+      return {
+        labels: { invested: "Monthly EMI", interest: "Total Interest Payable", finalValue: "Total Payment" },
+        compute: (summary, _values, rows) => ({
+          invested: Math.max(findRowValue(rows, (label) => label.includes("monthly emi")), 0),
+          interest: Math.max(findRowValue(rows, (label) => label.includes("total interest")), 0),
+          finalValue: Math.max(findRowValue(rows, (label) => label.includes("total repayment")), 0)
+        })
+      };
+    }
+
+    return customBySlug[slug] || defaultConfig;
+  }
+
   function parseNumber(value) {
     const num = Number(value);
     return Number.isFinite(num) ? num : 0;
@@ -241,13 +313,21 @@
       infoContainer.innerHTML = buildInfoContent(calculator);
     }
 
+    const resultConfig = getResultConfig(slug);
+    let splitChart;
+    let growthChart;
+
+    container.querySelector(".result-metrics").innerHTML = `
+      <article><span>${resultConfig.labels.invested}</span><strong id="metricInvested">${inr.format(0)}</strong></article>
+      <article><span>${resultConfig.labels.interest}</span><strong id="metricInterest">${inr.format(0)}</strong></article>
+      <article><span>${resultConfig.labels.finalValue}</span><strong id="metricFinal">${inr.format(0)}</strong></article>
+    `;
+
     const form = document.getElementById("dynamicCalculatorForm");
     const breakdownTable = document.getElementById("breakdownTable");
     const investedEl = document.getElementById("metricInvested");
     const interestEl = document.getElementById("metricInterest");
     const finalEl = document.getElementById("metricFinal");
-    let splitChart;
-    let growthChart;
 
     function collectValues() {
       const values = {};
@@ -309,15 +389,16 @@
 
       const rows = calculator.calculate(values);
       const summary = summarizeResults(rows);
-      animateNumber(investedEl, summary.invested, "currency");
-      animateNumber(interestEl, summary.interest, "currency");
-      animateNumber(finalEl, summary.finalValue, "currency");
+      const displayValues = resultConfig.compute(summary, values, rows);
+      animateNumber(investedEl, displayValues.invested, "currency");
+      animateNumber(interestEl, displayValues.interest, "currency");
+      animateNumber(finalEl, displayValues.finalValue, "currency");
 
       breakdownTable.innerHTML = `
         <table>
-          <tr><th>Total Investment</th><td>${inr.format(summary.invested)}</td></tr>
-          <tr><th>Interest Earned</th><td>${inr.format(summary.interest)}</td></tr>
-          <tr><th>Final Value</th><td>${inr.format(summary.finalValue)}</td></tr>
+          <tr><th>${resultConfig.labels.invested}</th><td>${inr.format(displayValues.invested)}</td></tr>
+          <tr><th>${resultConfig.labels.interest}</th><td>${inr.format(displayValues.interest)}</td></tr>
+          <tr><th>${resultConfig.labels.finalValue}</th><td>${inr.format(displayValues.finalValue)}</td></tr>
           ${rows.map(([label, value, type]) => `<tr><th>${label}</th><td>${formatValue(value, type)}</td></tr>`).join("")}
         </table>
       `;
