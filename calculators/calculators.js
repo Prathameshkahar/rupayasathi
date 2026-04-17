@@ -50,7 +50,7 @@
         <p class="calc-category">${item.category}</p>
         <h2>${item.name}</h2>
         <p>${item.description}</p>
-        <a class="btn btn-primary" href="calculators/${item.slug}.html">Open Calculator</a>
+        <a class="btn btn-primary" href="calculators/${item.slug}">Open Calculator</a>
       </article>
     `).join("");
   }
@@ -234,7 +234,7 @@
           <div class="breakdown-table" id="breakdownTable"></div>
         </section>
       </section>
-      <a class="btn btn-outline full-width" href="../calculators.html">← Back to Calculators Hub</a>
+      <a class="btn btn-outline full-width" href="../calculators">← Back to Calculators Hub</a>
     `;
 
     if (infoContainer) {
