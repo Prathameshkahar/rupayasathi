@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const links = [
             { label: "Home", href: `${base}` },
             { label: "Calculators", href: `${base}calculators` },
+            { label: "Markets", href: `${base}markets` },
             { label: "Blogs", href: `${base}blogs` },
             { label: "Contact", href: `${base}contact` }
         ];

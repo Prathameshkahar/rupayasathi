@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markets Dashboard | Rupaya Saathi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="markets.css">
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navbar container">
+            <a class="logo" href="/">Rupaya Saathi</a>
+            <button class="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="calculators">Calculators</a></li>
+                <li><a class="active" href="markets">Markets</a></li>
+                <li><a href="blogs">Blogs</a></li>
+                <li><a href="contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="markets-page">
+        <section class="markets-hero">
+            <div class="container">
+                <h1>Live Markets &amp; Currency Dashboard</h1>
+                <p>Track global currencies, exchange rates, and financial trends in real-time.</p>
+            </div>
+        </section>
+
+        <section class="section-block container" id="exchangeRates">
+            <h2>Currency Exchange Rates</h2>
+            <p class="section-note">Updated every 60 seconds (base: INR).</p>
+            <div class="rates-grid" id="ratesGrid" aria-live="polite"></div>
+        </section>
+
+        <section class="section-block container">
+            <h2>Live Market Charts</h2>
+            <div class="charts-grid" id="chartsGrid"></div>
+        </section>
+
+        <section class="section-block container">
+            <h2>Top Global Currencies</h2>
+            <div class="currency-grid" id="currencyInfoGrid"></div>
+        </section>
+
+        <section class="section-block container disclaimer-card">
+            <p>Market data is for informational purposes only and may not be real-time. Please verify before making financial decisions.</p>
+        </section>
+    </main>
+    <script src="script.js" defer></script>
+    <script src="markets.js" defer></script>
+</body>
+</html>
