@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="markets.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
     <header class="site-header">
@@ -40,16 +41,51 @@
 
         <section class="section-block container">
             <h2>Live Market Charts</h2>
-            <div class="charts-grid" id="chartsGrid"></div>
+            <div class="charts-grid" id="chartsGrid">
+                <article class="chart-card">
+                    <div class="chart-card-header">
+                        <h3>USD/INR Trend</h3>
+                        <div class="timeframe-selector" role="group" aria-label="USD INR timeframe" data-pair="USD">
+                            <button class="time-btn is-active" data-timeframe="1D">1D</button>
+                            <button class="time-btn" data-timeframe="1W">1W</button>
+                            <button class="time-btn" data-timeframe="1M">1M</button>
+                            <button class="time-btn" data-timeframe="1Y">1Y</button>
+                        </div>
+                    </div>
+                    <div class="chart-container"><canvas id="usdChart"></canvas></div>
+                </article>
+
+                <article class="chart-card">
+                    <div class="chart-card-header">
+                        <h3>EUR/INR Trend</h3>
+                        <div class="timeframe-selector" role="group" aria-label="EUR INR timeframe" data-pair="EUR">
+                            <button class="time-btn is-active" data-timeframe="1D">1D</button>
+                            <button class="time-btn" data-timeframe="1W">1W</button>
+                            <button class="time-btn" data-timeframe="1M">1M</button>
+                            <button class="time-btn" data-timeframe="1Y">1Y</button>
+                        </div>
+                    </div>
+                    <div class="chart-container"><canvas id="eurChart"></canvas></div>
+                </article>
+
+                <article class="chart-card">
+                    <div class="chart-card-header">
+                        <h3>GBP/INR Trend</h3>
+                        <div class="timeframe-selector" role="group" aria-label="GBP INR timeframe" data-pair="GBP">
+                            <button class="time-btn is-active" data-timeframe="1D">1D</button>
+                            <button class="time-btn" data-timeframe="1W">1W</button>
+                            <button class="time-btn" data-timeframe="1M">1M</button>
+                            <button class="time-btn" data-timeframe="1Y">1Y</button>
+                        </div>
+                    </div>
+                    <div class="chart-container"><canvas id="gbpChart"></canvas></div>
+                </article>
+            </div>
         </section>
 
         <section class="section-block container">
             <h2>Top Global Currencies</h2>
             <div class="currency-grid" id="currencyInfoGrid"></div>
-        </section>
-
-        <section class="section-block container disclaimer-card">
-            <p>Market data is for informational purposes only and may not be real-time. Please verify before making financial decisions.</p>
         </section>
     </main>
     <script src="script.js" defer></script>
