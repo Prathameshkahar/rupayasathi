@@ -1,140 +1,136 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const ratesGrid = document.getElementById("ratesGrid");
-    const currencyInfoGrid = document.getElementById("currencyInfoGrid");
-
-    const currencyMeta = [
-        { code: "USD", symbol: "$", name: "US Dollar", flag: "🇺🇸", description: "Global reserve currency used in world trade and commodities." },
-        { code: "EUR", symbol: "€", name: "Euro", flag: "🇪🇺", description: "Shared currency used across many EU nations." },
-        { code: "GBP", symbol: "£", name: "British Pound", flag: "🇬🇧", description: "One of the oldest actively traded global currencies." },
-        { code: "JPY", symbol: "¥", name: "Japanese Yen", flag: "🇯🇵", description: "A highly liquid safe-haven currency in Asia." },
-        { code: "CNY", symbol: "¥", name: "Chinese Yuan", flag: "🇨🇳", description: "A key trade currency with rising global influence." },
-        { code: "AED", symbol: "د.إ", name: "UAE Dirham", flag: "🇦🇪", description: "Widely used Gulf currency for energy-linked trade." }
-    ];
-
-    const chartConfig = {
-        USD: { canvasId: "usdChart", title: "USD/INR" },
-        EUR: { canvasId: "eurChart", title: "EUR/INR" },
-        GBP: { canvasId: "gbpChart", title: "GBP/INR" }
+    const primaryApi = "https://open.er-api.com/v6/latest/INR";
+    const fallbackApi = "https://api.exchangerate.host/latest?base=INR";
+    const trackedCurrencies = ["USD", "EUR", "GBP", "AED", "JPY"];
+    const fallbackRates = {
+        USD: 0.0120,
+        EUR: 0.0111,
+        GBP: 0.0095,
+        AED: 0.0440,
+        JPY: 1.8800
     };
 
-    const charts = {};
-    const timeframeDays = { "1D": 1, "1W": 7, "1M": 30, "1Y": 365 };
-    const chartState = { USD: "1D", EUR: "1D", GBP: "1D" };
-
-    const showRateSkeletons = () => {
-        ratesGrid.innerHTML = Array.from({ length: 6 }).map(() => '<article class="skeleton"></article>').join("");
+    const symbols = {
+        USD: "$",
+        EUR: "€",
+        GBP: "£",
+        AED: "د.إ",
+        JPY: "¥"
     };
 
-    const renderTopCurrencies = () => {
-        currencyInfoGrid.innerHTML = currencyMeta.map(({ code, name, flag, description }) => `
-            <article class="currency-card">
-                <h3>${flag} ${code} - ${name}</h3>
-                <p>${description}</p>
-            </article>
-        `).join("");
-    };
+    const statusEl = document.getElementById("marketStatus");
+    const cardsEl = document.getElementById("currency-cards");
+    const usdCtx = document.getElementById("usdChart");
+    let usdChart = null;
 
-    const renderRates = (rates, previousRates = {}) => {
-        ratesGrid.innerHTML = currencyMeta.map(({ code, symbol, name, flag }) => {
-            const rate = rates[code];
-            const prev = previousRates[code] || rate;
-            const change = prev ? ((rate - prev) / prev) * 100 : 0;
-            const trendClass = change >= 0 ? "trend-up" : "trend-down";
-            const trendArrow = change >= 0 ? "▲" : "▼";
+    function getSavedRates() {
+        const saved = localStorage.getItem("markets_cached_rates");
+        if (!saved) return fallbackRates;
+        try {
+            return { ...fallbackRates, ...JSON.parse(saved) };
+        } catch {
+            return fallbackRates;
+        }
+    }
+
+    async function fetchRates() {
+        try {
+            const res = await fetch(primaryApi, { cache: "no-store" });
+            if (!res.ok) throw new Error("Primary API HTTP error");
+            const data = await res.json();
+            if (!data.rates) throw new Error("Primary API malformed");
+            return { rates: data.rates, source: "primary", warning: false };
+        } catch {
+            try {
+                const res = await fetch(fallbackApi, { cache: "no-store" });
+                if (!res.ok) throw new Error("Fallback API HTTP error");
+                const data = await res.json();
+                if (!data.rates) throw new Error("Fallback API malformed");
+                return { rates: data.rates, source: "fallback", warning: true };
+            } catch {
+                return { rates: getSavedRates(), source: "cache", warning: true };
+            }
+        }
+    }
+
+    function generateData(baseRate) {
+        const data = [];
+        for (let i = 0; i < 30; i += 1) {
+            data.push(baseRate + (Math.random() - 0.5) * 0.002);
+        }
+        return data;
+    }
+
+    function renderCards(rates) {
+        cardsEl.innerHTML = trackedCurrencies.map((code) => {
+            const rate = Number(rates[code] ?? fallbackRates[code]);
+            const symbol = symbols[code] || "";
             return `
-            <article class="market-card">
-                <div class="rate-header"><h3>${code}</h3><span>${flag}</span></div>
-                <p class="rate-value">₹1 = ${symbol}${rate ? rate.toFixed(4) : "N/A"}</p>
-                <p class="rate-meta">${name}</p>
-                <p class="${trendClass}">${trendArrow} ${Math.abs(change).toFixed(2)}%</p>
-            </article>`;
+                <article class="currency-card">
+                    <h3>${code}</h3>
+                    <p>₹1 = ${symbol}${rate.toFixed(4)}</p>
+                </article>
+            `;
         }).join("");
-    };
+    }
 
-    const createGradient = (ctx) => {
-        const gradient = ctx.createLinearGradient(0, 0, 0, 320);
-        gradient.addColorStop(0, "rgba(13,110,253,0.35)");
-        gradient.addColorStop(1, "rgba(13,110,253,0.02)");
-        return gradient;
-    };
+    function renderChart(rate) {
+        const ctx = usdCtx.getContext("2d");
+        const labels = [...Array(30).keys()].map((d) => `Day ${d + 1}`);
 
-    const buildChart = (pairCode, labels, values) => {
-        const canvas = document.getElementById(chartConfig[pairCode].canvasId);
-        const ctx = canvas.getContext("2d");
-        if (charts[pairCode]) charts[pairCode].destroy();
+        if (usdChart) usdChart.destroy();
 
-        charts[pairCode] = new Chart(ctx, {
+        usdChart = new Chart(ctx, {
             type: "line",
             data: {
                 labels,
                 datasets: [{
-                    label: chartConfig[pairCode].title,
-                    data: values,
-                    borderColor: "#0d6efd",
-                    backgroundColor: createGradient(ctx),
+                    label: "USD/INR (Sample Trend)",
+                    data: generateData(rate),
+                    borderColor: "#4CAF50",
+                    backgroundColor: "rgba(76, 175, 80, 0.15)",
                     fill: true,
-                    tension: 0.35,
-                    pointRadius: 0
+                    tension: 0.4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue("--text") || "#111"
+                        }
+                    }
+                },
                 scales: {
-                    x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--muted") || "#6c757d" } },
-                    y: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--muted") || "#6c757d" } }
+                    x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--muted") || "#666" } },
+                    y: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--muted") || "#666" } }
                 }
             }
         });
-    };
+    }
 
-    const fetchHistorical = async (code, timeframe) => {
-        const days = timeframeDays[timeframe];
-        const end = new Date();
-        const start = new Date(Date.now() - (days * 24 * 60 * 60 * 1000));
-        const formatDate = (d) => d.toISOString().split("T")[0];
+    async function loadMarketData() {
+        statusEl.textContent = "Loading market data...";
+        const { rates, source, warning } = await fetchRates();
 
-        const url = `https://api.exchangerate.host/timeframe?start_date=${formatDate(start)}&end_date=${formatDate(end)}&base=INR&symbols=${code}`;
-        const response = await fetch(url);
-        const data = await response.json();
-        const entries = Object.entries(data.rates || {});
-        const labels = entries.map(([date]) => date.slice(5));
-        const values = entries.map(([, row]) => row[code]);
-        buildChart(code, labels, values);
-    };
+        renderCards(rates);
 
-    const fetchData = async () => {
-        try {
-            showRateSkeletons();
-            const previousRates = JSON.parse(localStorage.getItem("inr_rates_previous") || "{}");
-            const response = await fetch("https://api.exchangerate.host/latest?base=INR");
-            const data = await response.json();
-            renderRates(data.rates, previousRates);
-            localStorage.setItem("inr_rates_previous", JSON.stringify(data.rates));
+        const usdRate = Number(rates.USD ?? fallbackRates.USD);
+        renderChart(usdRate);
 
-            await Promise.all(Object.keys(chartConfig).map((code) => fetchHistorical(code, chartState[code])));
-        } catch (error) {
-            ratesGrid.innerHTML = '<article class="market-card"><p>Unable to load market data right now.</p></article>';
+        localStorage.setItem("markets_cached_rates", JSON.stringify(rates));
+
+        if (warning) {
+            statusEl.textContent = "Live data unavailable. Showing last updated values.";
+            statusEl.classList.add("status-warning");
+        } else {
+            statusEl.textContent = `Live rates loaded successfully (${source} API).`;
+            statusEl.classList.remove("status-warning");
         }
-    };
+    }
 
-    document.querySelectorAll(".timeframe-selector").forEach((selector) => {
-        selector.addEventListener("click", async (event) => {
-            const btn = event.target.closest(".time-btn");
-            if (!btn) return;
-
-            selector.querySelectorAll(".time-btn").forEach((node) => node.classList.remove("is-active"));
-            btn.classList.add("is-active");
-
-            const pair = selector.dataset.pair;
-            const timeframe = btn.dataset.timeframe;
-            chartState[pair] = timeframe;
-            await fetchHistorical(pair, timeframe);
-        });
-    });
-
-    renderTopCurrencies();
-    fetchData();
-    window.setInterval(fetchData, 60000);
+    loadMarketData();
+    setInterval(loadMarketData, 60000);
 });
