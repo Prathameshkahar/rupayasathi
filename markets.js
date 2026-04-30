@@ -1,111 +1,140 @@
-
 document.addEventListener("DOMContentLoaded", () => {
     const ratesGrid = document.getElementById("ratesGrid");
-    const chartsGrid = document.getElementById("chartsGrid");
     const currencyInfoGrid = document.getElementById("currencyInfoGrid");
 
-    const targetCurrencies = [
-        { code: "USD", symbol: "$", name: "US Dollar", flag: "🇺🇸" },
-        { code: "EUR", symbol: "€", name: "Euro", flag: "🇪🇺" },
-        { code: "GBP", symbol: "£", name: "British Pound", flag: "🇬🇧" },
-        { code: "AED", symbol: "د.إ", name: "UAE Dirham", flag: "🇦🇪" },
-        { code: "JPY", symbol: "¥", name: "Japanese Yen", flag: "🇯🇵" },
-        { code: "CNY", symbol: "¥", name: "Chinese Yuan", flag: "🇨🇳" }
+    const currencyMeta = [
+        { code: "USD", symbol: "$", name: "US Dollar", flag: "🇺🇸", description: "Global reserve currency used in world trade and commodities." },
+        { code: "EUR", symbol: "€", name: "Euro", flag: "🇪🇺", description: "Shared currency used across many EU nations." },
+        { code: "GBP", symbol: "£", name: "British Pound", flag: "🇬🇧", description: "One of the oldest actively traded global currencies." },
+        { code: "JPY", symbol: "¥", name: "Japanese Yen", flag: "🇯🇵", description: "A highly liquid safe-haven currency in Asia." },
+        { code: "CNY", symbol: "¥", name: "Chinese Yuan", flag: "🇨🇳", description: "A key trade currency with rising global influence." },
+        { code: "AED", symbol: "د.إ", name: "UAE Dirham", flag: "🇦🇪", description: "Widely used Gulf currency for energy-linked trade." }
     ];
 
-    const topCurrencies = [
-        ["USD", "$", "US Dollar", "Global reserve currency used in trade and commodities pricing."],
-        ["EUR", "€", "Euro", "Major shared currency used by many European Union nations."],
-        ["GBP", "£", "British Pound", "One of the oldest actively traded currencies worldwide."],
-        ["JPY", "¥", "Japanese Yen", "Key Asian currency known for liquidity and safe-haven demand."],
-        ["CNY", "¥", "Chinese Yuan", "China's currency with growing importance in global trade."],
-        ["CHF", "CHF", "Swiss Franc", "Traditionally viewed as stable during market uncertainty."],
-        ["AUD", "A$", "Australian Dollar", "Commodity-linked currency influenced by metals and energy cycles."],
-        ["CAD", "C$", "Canadian Dollar", "Often tracks crude oil trends and North American growth."],
-        ["SGD", "S$", "Singapore Dollar", "Regional financial hub currency with strong monetary management."],
-        ["AED", "د.إ", "UAE Dirham", "Important Gulf currency commonly pegged to the US Dollar."]
-    ];
+    const chartConfig = {
+        USD: { canvasId: "usdChart", title: "USD/INR" },
+        EUR: { canvasId: "eurChart", title: "EUR/INR" },
+        GBP: { canvasId: "gbpChart", title: "GBP/INR" }
+    };
 
-    const chartWidgets = [
-        { title: "USD/INR", symbol: "FX_IDC:USDINR" },
-        { title: "EUR/INR", symbol: "FX_IDC:EURINR" },
-        { title: "GBP/INR", symbol: "FX_IDC:GBPINR" },
-        { title: "Gold (XAU/USD)", symbol: "OANDA:XAUUSD" },
-        { title: "Crude Oil", symbol: "TVC:USOIL" }
-    ];
+    const charts = {};
+    const timeframeDays = { "1D": 1, "1W": 7, "1M": 30, "1Y": 365 };
+    const chartState = { USD: "1D", EUR: "1D", GBP: "1D" };
 
-    const cacheKey = "inr_rates_cache_v1";
-    const cacheTtl = 60000;
+    const showRateSkeletons = () => {
+        ratesGrid.innerHTML = Array.from({ length: 6 }).map(() => '<article class="skeleton"></article>').join("");
+    };
 
     const renderTopCurrencies = () => {
-        currencyInfoGrid.innerHTML = topCurrencies.map(([code, symbol, name, description]) => `
+        currencyInfoGrid.innerHTML = currencyMeta.map(({ code, name, flag, description }) => `
             <article class="currency-card">
-                <h3>${code} - ${name}</h3>
-                <p><strong>Symbol:</strong> ${symbol}</p>
+                <h3>${flag} ${code} - ${name}</h3>
                 <p>${description}</p>
             </article>
         `).join("");
     };
 
-    const renderRates = (rates) => {
-        ratesGrid.innerHTML = targetCurrencies.map(({ code, symbol, name, flag }) => {
-            const value = rates[code] ? rates[code].toFixed(4) : "N/A";
-            return `<article class="market-card"><p class="rate-value">₹1 = ${symbol}${value}</p><p class="rate-meta">${flag} ${code} (${name})</p></article>`;
+    const renderRates = (rates, previousRates = {}) => {
+        ratesGrid.innerHTML = currencyMeta.map(({ code, symbol, name, flag }) => {
+            const rate = rates[code];
+            const prev = previousRates[code] || rate;
+            const change = prev ? ((rate - prev) / prev) * 100 : 0;
+            const trendClass = change >= 0 ? "trend-up" : "trend-down";
+            const trendArrow = change >= 0 ? "▲" : "▼";
+            return `
+            <article class="market-card">
+                <div class="rate-header"><h3>${code}</h3><span>${flag}</span></div>
+                <p class="rate-value">₹1 = ${symbol}${rate ? rate.toFixed(4) : "N/A"}</p>
+                <p class="rate-meta">${name}</p>
+                <p class="${trendClass}">${trendArrow} ${Math.abs(change).toFixed(2)}%</p>
+            </article>`;
         }).join("");
     };
 
-    const getCachedRates = () => {
-        const cache = localStorage.getItem(cacheKey);
-        if (!cache) return null;
-        const parsed = JSON.parse(cache);
-        if (Date.now() - parsed.timestamp > cacheTtl) return null;
-        return parsed.rates;
+    const createGradient = (ctx) => {
+        const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+        gradient.addColorStop(0, "rgba(13,110,253,0.35)");
+        gradient.addColorStop(1, "rgba(13,110,253,0.02)");
+        return gradient;
     };
 
-    const fetchRates = async () => {
-        const cached = getCachedRates();
-        if (cached) {
-            renderRates(cached);
-            return;
-        }
+    const buildChart = (pairCode, labels, values) => {
+        const canvas = document.getElementById(chartConfig[pairCode].canvasId);
+        const ctx = canvas.getContext("2d");
+        if (charts[pairCode]) charts[pairCode].destroy();
+
+        charts[pairCode] = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels,
+                datasets: [{
+                    label: chartConfig[pairCode].title,
+                    data: values,
+                    borderColor: "#0d6efd",
+                    backgroundColor: createGradient(ctx),
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--muted") || "#6c757d" } },
+                    y: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue("--muted") || "#6c757d" } }
+                }
+            }
+        });
+    };
+
+    const fetchHistorical = async (code, timeframe) => {
+        const days = timeframeDays[timeframe];
+        const end = new Date();
+        const start = new Date(Date.now() - (days * 24 * 60 * 60 * 1000));
+        const formatDate = (d) => d.toISOString().split("T")[0];
+
+        const url = `https://api.exchangerate.host/timeframe?start_date=${formatDate(start)}&end_date=${formatDate(end)}&base=INR&symbols=${code}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        const entries = Object.entries(data.rates || {});
+        const labels = entries.map(([date]) => date.slice(5));
+        const values = entries.map(([, row]) => row[code]);
+        buildChart(code, labels, values);
+    };
+
+    const fetchData = async () => {
         try {
-            const response = await fetch("https://api.exchangerate-api.com/v4/latest/INR");
+            showRateSkeletons();
+            const previousRates = JSON.parse(localStorage.getItem("inr_rates_previous") || "{}");
+            const response = await fetch("https://api.exchangerate.host/latest?base=INR");
             const data = await response.json();
-            localStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), rates: data.rates }));
-            renderRates(data.rates);
+            renderRates(data.rates, previousRates);
+            localStorage.setItem("inr_rates_previous", JSON.stringify(data.rates));
+
+            await Promise.all(Object.keys(chartConfig).map((code) => fetchHistorical(code, chartState[code])));
         } catch (error) {
-            ratesGrid.innerHTML = '<article class="market-card"><p>Unable to load exchange rates right now.</p></article>';
+            ratesGrid.innerHTML = '<article class="market-card"><p>Unable to load market data right now.</p></article>';
         }
     };
 
-    const initCharts = () => {
-        chartsGrid.innerHTML = chartWidgets.map(({ title, symbol }) => `
-            <article class="chart-card">
-                <h3>${title}</h3>
-                <div class="chart-shell" data-symbol="${symbol}"></div>
-            </article>
-        `).join("");
+    document.querySelectorAll(".timeframe-selector").forEach((selector) => {
+        selector.addEventListener("click", async (event) => {
+            const btn = event.target.closest(".time-btn");
+            if (!btn) return;
 
-        const observer = new IntersectionObserver((entries, obs) => {
-            entries.forEach((entry) => {
-                if (!entry.isIntersecting) return;
-                const shell = entry.target;
-                const symbol = shell.dataset.symbol;
-                const iframe = document.createElement("iframe");
-                iframe.className = "chart-frame";
-                iframe.loading = "lazy";
-                iframe.title = `${symbol} chart`;
-                iframe.src = `https://s.tradingview.com/widgetembed/?frameElementId=tv-${symbol}&symbol=${encodeURIComponent(symbol)}&interval=60&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=f1f3f6&studies=[]&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hidevolume=1&allow_symbol_change=1`;
-                shell.appendChild(iframe);
-                obs.unobserve(shell);
-            });
-        }, { rootMargin: "150px 0px" });
+            selector.querySelectorAll(".time-btn").forEach((node) => node.classList.remove("is-active"));
+            btn.classList.add("is-active");
 
-        document.querySelectorAll(".chart-shell").forEach((shell) => observer.observe(shell));
-    };
+            const pair = selector.dataset.pair;
+            const timeframe = btn.dataset.timeframe;
+            chartState[pair] = timeframe;
+            await fetchHistorical(pair, timeframe);
+        });
+    });
 
     renderTopCurrencies();
-    initCharts();
-    fetchRates();
-    window.setInterval(fetchRates, 60000);
+    fetchData();
+    window.setInterval(fetchData, 60000);
 });
