@@ -1,78 +1,89 @@
 :root {
-    --bg-color: var(--bg);
-    --card-bg: var(--card-bg);
-    --text-color: var(--text);
+    --markets-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
 }
 
-.markets-page { background: var(--bg-color); color: var(--text-color); padding-bottom: 48px; }
+.markets-page {
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 48px;
+}
+
 .markets-hero {
-    background: radial-gradient(circle at top right, rgba(13, 110, 253, 0.2), transparent 50%), linear-gradient(135deg, rgba(31, 169, 113, 0.12), rgba(13, 110, 253, 0.08));
+    background: radial-gradient(circle at top right, rgba(13, 110, 253, 0.2), transparent 55%), linear-gradient(130deg, rgba(31, 169, 113, 0.12), rgba(13, 110, 253, 0.08));
     padding: 76px 0 58px;
     text-align: center;
 }
-.section-block { padding: 36px 0 4px; }
-.section-note { color: var(--muted); margin-bottom: 18px; }
 
-.rates-grid, .charts-grid, .currency-grid { display: grid; gap: 16px; }
-.rates-grid { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
-.currency-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-.charts-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.section-block {
+    padding: 36px 0 4px;
+}
 
-.market-card, .chart-card, .currency-card {
+.section-note,
+.status-message {
+    color: var(--muted);
+    margin-bottom: 16px;
+}
+
+.status-warning {
+    color: #d97706;
+    font-weight: 600;
+}
+
+.currency-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.currency-card {
     background: var(--card-bg);
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 18px;
-    box-shadow: var(--shadow);
-    transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
-}
-.market-card:hover, .chart-card:hover, .currency-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 20px 35px rgba(8, 16, 36, 0.12);
-    border-color: rgba(13, 110, 253, 0.35);
+    box-shadow: var(--markets-shadow);
 }
 
-.rate-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.rate-value { font-size: 1.2rem; font-weight: 700; color: var(--primary-dark); }
-.rate-meta { color: var(--muted); font-size: .95rem; }
-.trend-up { color: #1b9a5a; font-weight: 600; }
-.trend-down { color: #d94848; font-weight: 600; }
-
-.chart-card-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-.timeframe-selector { display: inline-flex; gap: 8px; background: rgba(13, 110, 253, 0.06); padding: 6px; border-radius: 12px; }
-.time-btn {
-    border: none; background: transparent; color: var(--text-color); padding: 6px 10px; border-radius: 8px; cursor: pointer; font-weight: 600;
-    transition: background-color .2s ease, color .2s ease;
+.currency-card h3 {
+    margin: 0 0 8px;
 }
-.time-btn.is-active { background: var(--primary); color: #fff; }
+
+.currency-card p {
+    margin: 0;
+    font-weight: 600;
+    color: var(--primary-dark);
+}
 
 .chart-container {
     position: relative;
     width: 100%;
-    height: 340px;
-    border-radius: 12px;
-    overflow: hidden;
-    background: linear-gradient(180deg, rgba(13, 110, 253, 0.08), rgba(13, 110, 253, 0.02));
-}
-
-.currency-card h3 { margin-bottom: 8px; }
-.currency-card p { margin-bottom: 8px; color: var(--muted); }
-
-.skeleton {
-    min-height: 100px;
+    height: 350px;
+    max-width: 800px;
+    margin: auto;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
     border-radius: 14px;
-    background: linear-gradient(90deg, rgba(150, 150, 150, 0.16), rgba(220, 220, 220, 0.22), rgba(150, 150, 150, 0.16));
-    background-size: 300% 100%;
-    animation: pulse 1.3s infinite;
+    box-shadow: var(--markets-shadow);
+    padding: 12px;
 }
-@keyframes pulse { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+
+canvas {
+    max-height: 350px;
+}
 
 @media (prefers-color-scheme: dark) {
-    .chart-container { background: linear-gradient(180deg, rgba(36, 125, 250, 0.2), rgba(36, 125, 250, 0.03)); }
-    .timeframe-selector { background: rgba(255, 255, 255, 0.08); }
+    .status-warning {
+        color: #f59e0b;
+    }
 }
 
 @media (max-width: 800px) {
-    .charts-grid, .currency-grid, .rates-grid { grid-template-columns: 1fr; }
-    .chart-container { height: 300px; }
+    .currency-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-container {
+        max-width: 100%;
+        height: 320px;
+        padding: 8px;
+    }
 }
