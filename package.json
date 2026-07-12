@@ -1,0 +1,22 @@
+{
+  "name": "rupayasathi",
+  "version": "1.0.0",
+  "description": "Smart financial tools and insights for Indians",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'Static HTML site - no build needed'",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": [
+    "finance",
+    "calculator",
+    "india",
+    "sip",
+    "emi"
+  ],
+  "author": "Rupaya Saathi",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/analytics": "^1.4.1"
+  }
+}
